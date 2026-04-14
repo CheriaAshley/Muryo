@@ -18,8 +18,10 @@
     <ClCompile Include="muryo_backend.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="db_test.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="httplib.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
