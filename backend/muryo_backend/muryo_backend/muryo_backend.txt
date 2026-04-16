@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <string>
 #include "httplib.h"//HTTP服务器库
 #include <mysql.h>//MySQl数据库接口
@@ -36,57 +36,57 @@ int main() {
     Server svr;
     //主界面
     svr.Get("/", [](const Request&, Response& res) {
-        res.set_content("欢迎来到Muryo主页~", "text/plain; charset=UTF-8");
+        res.set_content("Muryo home page", "text/plain; charset=UTF-8");
         });
     //测试后端运行
     svr.Get("/test", [](const Request&, Response& res) {
-        res.set_content("Muryo正在运行", "text/plain; charset=UTF-8");
+        res.set_content("Muryo backend is running", "text/plain; charset=UTF-8");
         });
     //注册界面
     svr.Post("/register", [](const Request& req, Response& res) {
-        string user_name = req.get_param_value("user_name");
+        string username = req.get_param_value("user_name");
         string password = req.get_param_value("password");
 
-        if (user_name.empty() || password.empty()) {
-            res.set_content("用户名和密码不能为空哦~", "text/plain; charset=UTF-8");
+        if (username.empty() || password.empty()) {
+            res.set_content("username or password is empty", "text/plain; charset=UTF-8");
             return;
         }
 
         MYSQL* conn = connect_db();
         if (conn == NULL) {
-            res.set_content("数据库连接失败", "text/plain; charset=UTF-8");
+            res.set_content("database connection failed", "text/plain; charset=UTF-8");
             return;
         }
         //SQL代码生成
-        string sql = "INSERT INTO user(user_name, password) VALUES('" + user_name + "','" + password + "')";
+        string sql = "INSERT INTO user(user_name, password) VALUES('" + username + "','" + password + "')";
 
         int result = mysql_query(conn, sql.c_str());
         if (result != 0) {
             string err = mysql_error(conn);
             mysql_close(conn);
-            res.set_content("注册失败: " + err, "text/plain; charset=UTF-8");
+            res.set_content("register failed: " + err, "text/plain; charset=UTF-8");
             return;
         }
 
         mysql_close(conn);
-        res.set_content("注册成功~欢迎加入Muryo~", "text/plain; charset=UTF-8");
+        res.set_content("register success", "text/plain; charset=UTF-8");
         });
     // 登录接口
     svr.Post("/login", [](const Request& req, Response& res) {
-        string user_name = req.get_param_value("user_name");
+        string username = req.get_param_value("user_name");
         string password = req.get_param_value("password");
 
         MYSQL* conn = connect_db();
         if (conn == NULL) {
-            res.set_content("数据库连接失败", "text/plain; charset=UTF-8");
+            res.set_content("Database connection failed", "text/plain; charset=UTF-8");
             return;
         }
 
         //生成SQL语句
-        string sql = "SELECT * FROM user WHERE user_name='" + user_name + "' AND password='" + password + "'";
+        string sql = "SELECT * FROM user WHERE user_name='" + username + "' AND password='" + password + "'";
 
         if (mysql_query(conn, sql.c_str())) {
-            string err = "请求失败: ";
+            string err = "Query failed: ";
             err += mysql_error(conn);
             res.set_content(err, "text/plain; charset=UTF-8");
             mysql_close(conn);
@@ -97,7 +97,7 @@ int main() {
         MYSQL_RES* result = mysql_store_result(conn);
 
         if (result == NULL) {
-            res.set_content("查询失败", "text/plain; charset=UTF-8");
+            res.set_content("Failed to get result", "text/plain; charset=UTF-8");
             mysql_close(conn);
             return;
         }
@@ -106,10 +106,10 @@ int main() {
         MYSQL_ROW row = mysql_fetch_row(result);
 
         if (row) {
-            res.set_content("{\"success\":true,\"message\":\"登录成功！欢迎来到Muryo！\"}", "application/json");
+            res.set_content("Login success", "text/plain; charset=UTF-8");
         }
         else {
-            res.set_content("{\"success\":false,\"message\":\"登录失败，咪请检查账号密码或是否注册~\"}", "application/json");
+            res.set_content("Username or password is incorrect", "text/plain; charset=UTF-8");
         }
 
         mysql_free_result(result);
@@ -118,26 +118,26 @@ int main() {
     //发布制品接口
     svr.Post("/publish", [](const Request& req, Response& res) {
 
-        string owner = req.get_param_value("owner");
-        string item_name = req.get_param_value("item_name");
+        string user_id = req.get_param_value("user_id");
+        string name = req.get_param_value("name");//制品名称
         string type = req.get_param_value("type");
         string intro = req.get_param_value("intro");
         string quantity = req.get_param_value("quantity");
-        string role = req.get_param_value("role");
+
         MYSQL* conn = connect_db();
         if (conn == NULL) {
-            res.set_content("数据库连接失败", "text/plain;charset=UTF-8");
+            res.set_content("DB connection failed", "text/plain");
             return;
         }
 
-        string sql = "INSERT INTO item(owner, item_name, type, intro, quantity,role) VALUES('"
-            + owner + "','" + item_name + "','" + type + "','" + intro + "','" + quantity + "','"+role+"')";
+        string sql = "INSERT INTO item(owner, item_name, type, intro, quantity) VALUES('"
+            + user_id + "','" + name + "','" + type + "','" + intro + "','" + quantity + "')";
 
         if (mysql_query(conn, sql.c_str())) {
-            res.set_content("发布失败", "text/plain;charset=UTF-8");
+            res.set_content("Publish failed", "text/plain");
         }
         else {
-            res.set_content("发布成功！快去和同好一起交流吧~", "text/plain;charset=UTF-8");
+            res.set_content("Publish success", "text/plain");
         }
 
         mysql_close(conn);
@@ -208,20 +208,20 @@ int main() {
         }
 
         // 状态必须可交换(0可以，1不行）
-        if (status != 1) {
+        if (status != 0) {
             res.set_content("这个制品不可以交换~", "text/plain;charset=UTF-8");
             mysql_close(conn);
             return;
         }
 
         //  插入交换记录
-        string sql_insert = "INSERT INTO exchange(item_id, ufrom, uto, status) VALUES("
+        string sql_insert = "INSERT INTO exchange(item_id, ufrom, requester_id, exchange_status) VALUES("
             + to_string(item_id) + ","
             + to_string(ufrom) + ","
             + to_string(uto) + ",0)";
 
         if (mysql_query(conn, sql_insert.c_str())) {
-            res.set_content("申请交换失败", "text/plain;charset=UTF-8");
+            res.set_content("Apply exchange failed", "text/plain");
         }
         else {
             res.set_content("Apply exchange success", "text/plain");
