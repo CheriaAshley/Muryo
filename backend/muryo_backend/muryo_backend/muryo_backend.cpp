@@ -32,7 +32,19 @@ MYSQL* connect_db() {//链接数据库并返回连接对象
 
     return conn;
 }
+vector<string> split(const string& s, char delimiter) {
+    vector<string> result;
+    string temp;
+    stringstream ss(s);
+
+    while (getline(ss, temp, delimiter)) {
+        result.push_back(temp);
+    }
+
+    return result;
+}
 int main() {
+    system("chcp 65001");
     Server svr;
     //主界面
     svr.Get("/", [](const Request&, Response& res) {
@@ -134,7 +146,7 @@ int main() {
             + owner + "','" + item_name + "','" + type + "','" + intro + "','" + quantity + "','"+role+"')";
 
         if (mysql_query(conn, sql.c_str())) {
-            res.set_content("发布失败", "text/plain;charset=UTF-8");
+            res.set_content("发布失败，请检查制品数量或用户状态", "text/plain;charset=UTF-8");
         }
         else {
             res.set_content("发布成功！快去和同好一起交流吧~", "text/plain;charset=UTF-8");
@@ -144,89 +156,156 @@ int main() {
         });
     //申请交换
     svr.Post("/exchange/apply", [](const Request& req, Response& res) {
-        string item_idstr = req.get_param_value("item_id");
-        string utostr = req.get_param_value("uto");
-
-        int item_id, uto;
-        //检测无效字符
-        try {
-            item_id = stoi(item_idstr);
-            uto = stoi(utostr);
-        }
-        catch (...) {
-            res.set_content("item_id or uto invalid", "text/plain");
-            return;
-        }
-
         MYSQL* conn = connect_db();
         if (conn == NULL) {
-            res.set_content("DB connection failed", "text/plain");
+            res.set_content("数据库连接失败", "text/plain;charset=UTF-8");
             return;
         }
 
-        // 查询制品信息
-        string sql_select = "SELECT owner, quantity, status FROM item WHERE item_id = " + to_string(item_id);
-        if (mysql_query(conn, sql_select.c_str())) {
-            res.set_content("Query item failed", "text/plain");
+        string ufrom = req.get_param_value("ufrom");
+        string uto = req.get_param_value("uto");
+        string item_idsstr = req.get_param_value("item_ids");      
+        string quantitystr = req.get_param_value("quantities"); 
+        
+        
+        if (ufrom.empty() || uto.empty() || item_idsstr.empty() || quantitystr.empty()) {
+            res.set_content("参数不能为空", "text/plain;charset=UTF-8");
             mysql_close(conn);
             return;
         }
 
-        MYSQL_RES* result = mysql_store_result(conn);
-        if (result == NULL) {
-            res.set_content("Store result failed", "text/plain");
+        vector<string> item_ids = split(item_idsstr, ',');
+        vector<string> quantity = split(quantitystr, ',');
+
+  
+        if (item_ids.size() != quantity.size()) {
+            res.set_content("请检查制品和制品数量填写一致！", "text/plain;charset=UTF-8");
             mysql_close(conn);
             return;
         }
 
-        MYSQL_ROW row = mysql_fetch_row(result);
-        if (row == NULL) {
-            res.set_content("Item not found", "text/plain");
+        if (item_ids.empty()) {
+            res.set_content("至少要申请一个制品哟~", "text/plain;charset=UTF-8");
+            mysql_close(conn);
+            return;
+        }
+
+        mysql_query(conn, "START TRANSACTION");//事物
+
+        
+        string sql_exchange = "INSERT INTO exchange(ufrom, uto, status) VALUES('"
+            + ufrom + "','" + uto + "','0')";
+
+        if (mysql_query(conn, sql_exchange.c_str())) {
+            cout << "请求失败: " << mysql_error(conn) << endl;
+            mysql_query(conn, "ROLLBACK");
+            res.set_content(string("申请失败: ") + mysql_error(conn), "text/plain;charset=UTF-8");
+            mysql_close(conn);
+            return;
+        }
+        int exchange_id = (int)mysql_insert_id(conn);
+
+        for (int i = 0; i < item_ids.size(); i++) {
+            string item_id = item_ids[i];
+            string apply_quantity = quantity[i];
+
+            if (item_id.empty() || apply_quantity.empty()) {
+                mysql_query(conn, "ROLLBACK");
+                res.set_content("制品编号和数量不能为空哦~", "text/plain;charset=UTF-8");
+                mysql_close(conn);
+                return;
+            }
+
+            int q = stoi(apply_quantity);
+            if (q <= 0) {
+                mysql_query(conn, "ROLLBACK");
+                res.set_content("申请数量必须大于0哦~", "text/plain;charset=UTF-8");
+                mysql_close(conn);
+                return;
+            }
+            string check_sql = "SELECT quantity, owner,status FROM item WHERE item_id = " + item_id;
+
+            if (mysql_query(conn, check_sql.c_str())) {
+                cout << "请求错误: " << mysql_error(conn) << endl;
+                mysql_query(conn, "ROLLBACK");
+                res.set_content(string("查询制品失败: ") + mysql_error(conn), "text/plain;charset=UTF-8");
+                mysql_close(conn);
+                return;
+            }
+
+            MYSQL_RES* result = mysql_store_result(conn);
+            if (result == NULL) {
+                mysql_query(conn, "ROLLBACK");
+                res.set_content("制品查询失败", "text/plain;charset=UTF-8");
+                mysql_close(conn);
+                return;
+            }
+
+            MYSQL_ROW row = mysql_fetch_row(result);
+            if (row == NULL) {
+                mysql_free_result(result);
+                mysql_query(conn, "ROLLBACK");
+                res.set_content(("请检查制品编号~，item_id = " + item_id).c_str(), "text/plain;charset=UTF-8");
+                mysql_close(conn);
+                return;
+            }
+
+            int stock = stoi(row[0]);
+            string owner = row[1];
+            int status = stoi(row[2]);
+
             mysql_free_result(result);
-            mysql_close(conn);
-            return;
+            if (status!=0) {
+                mysql_query(conn, "ROLLBACK");
+                res.set_content(("item_id = " + item_id + " 这个制品不可以交换哟~").c_str(), "text/plain;charset=UTF-8");
+                mysql_close(conn);
+                return;
+            }
+            if (owner != ufrom) {
+                mysql_query(conn, "ROLLBACK");
+                res.set_content(("item_id = " + item_id + " 这个制品不属于咪地申请对象~").c_str(), "text/plain;charset=UTF-8");
+                mysql_close(conn);
+                return;
+            }
+            if (owner == uto) {
+                mysql_query(conn, "ROLLBACK");
+                res.set_content("咪不可以和自己交换哦~快去寻找同好叭！", "text/plain;charset=UTF-8");
+                mysql_close(conn);
+                return;
+            }
+
+            if (stock < q) {
+                mysql_query(conn, "ROLLBACK");
+                res.set_content(("咪来晚一步！item_id = " + item_id + "数量不足！").c_str(), "text/plain;charset=UTF-8");
+                mysql_close(conn);
+                return;
+            }
+            string count = "UPDATE item SET quantity="
+                + to_string(stock-q) + " WHERE item_id=" + item_id ;
+
+            if (mysql_query(conn, count.c_str())) {
+                cout << "请求失败: " << mysql_error(conn) << endl;
+                mysql_query(conn, "ROLLBACK");
+                res.set_content(string("数量更新失败！ ") + mysql_error(conn), "text/plain;charset=UTF-8");
+                mysql_close(conn);
+                return;
+            }
+
+            // 插入明细表
+            string sql_detail = "INSERT INTO exdetail(exchange_id, item_id, quantity) VALUES("
+                + to_string(exchange_id) + "," + item_id + "," + apply_quantity + ")";
+
+            if (mysql_query(conn, sql_detail.c_str())) {
+                cout << "请求失败: " << mysql_error(conn) << endl;
+                mysql_query(conn, "ROLLBACK");
+                res.set_content(string("插入明细失败: ") + mysql_error(conn), "text/plain;charset=UTF-8");
+                mysql_close(conn);
+                return;
+            }
         }
 
-        int ufrom = stoi(row[0]);
-        int quantity = stoi(row[1]);
-        int status = stoi(row[2]);
-
-        mysql_free_result(result);
-
-        // 不能和自己交换
-        if (ufrom == uto) {
-            res.set_content("You cannot exchange your own item", "text/plain");
-            mysql_close(conn);
-            return;
-        }
-
-        // 数量大于0才可以交换
-        if (quantity <= 0) {
-            res.set_content("Meowryo来晚一步~制品已经换完啦", "text/plain;charset=UTF-8");
-            mysql_close(conn);
-            return;
-        }
-
-        // 状态必须可交换(0可以，1不行）
-        if (status != 1) {
-            res.set_content("这个制品不可以交换~", "text/plain;charset=UTF-8");
-            mysql_close(conn);
-            return;
-        }
-
-        //  插入交换记录
-        string sql_insert = "INSERT INTO exchange(item_id, ufrom, uto, status) VALUES("
-            + to_string(item_id) + ","
-            + to_string(ufrom) + ","
-            + to_string(uto) + ",0)";
-
-        if (mysql_query(conn, sql_insert.c_str())) {
-            res.set_content("申请交换失败", "text/plain;charset=UTF-8");
-        }
-        else {
-            res.set_content("Apply exchange success", "text/plain");
-        }
-
+        mysql_query(conn, "COMMIT");
+        res.set_content("恭喜咪，申请交换成功！", "text/plain;charset=UTF-8");
         mysql_close(conn);
         });
     //查看收到的申请
@@ -238,52 +317,60 @@ int main() {
             ufrom = stoi(ufromstr);
         }
         catch (...) {
-            res.set_content("Invalid ufrom", "text/plain");
+            res.set_content("请输入正确的用户ID哟~", "text/plain;charset=UTF-8");
             return;
         }
 
         MYSQL* conn = connect_db();
         if (conn == NULL) {
-            res.set_content("DB connection failed", "text/plain");
+            res.set_content("数据库连接失败", "text/plain;charset=UTF-8");
             return;
         }
-
-        string sql = "SELECT e.exchange_id, e.item_id, i.item_name, e.ufrom, e.status "
-            "FROM exchange e "
-            "JOIN item i ON e.item_id = i.item_id "
-            "WHERE e.ufrom = " + to_string(ufrom);
+        string sql = "SELECT e.detail_id,e.quantity,e.item_id,i.item_name,i.quantity AS 'left',a.status FROM exdetail e JOIN item i ON e.item_id = i.item_id JOIN exchange a ON e.exchange_id = a.exchange_id WHERE i.owner = " + ufromstr;
 
         if (mysql_query(conn, sql.c_str())) {
-            res.set_content("Query incoming exchanges failed", "text/plain");
+            cout << "请求失败: " << mysql_error(conn) << endl;
+            res.set_content(string("查询失败: ") + mysql_error(conn), "text/plain;charset=UTF-8");
             mysql_close(conn);
             return;
         }
 
         MYSQL_RES* result = mysql_store_result(conn);
+
         if (result == NULL) {
-            res.set_content("Store result failed", "text/plain");
+            cout << "获取结果失败: " << mysql_error(conn) << endl;
+            res.set_content(string("查询失败: ") + mysql_error(conn), "text/plain;charset=UTF-8");
             mysql_close(conn);
             return;
         }
 
-        string output = "";
         MYSQL_ROW row;
-
-        while ((row = mysql_fetch_row(result))) {
-            output += "exchange_id: " + string(row[0]) + "\n";
-            output += "item_id: " + string(row[1]) + "\n";
-            output += "item_name: " + string(row[2]) + "\n";
-            output += "ufrom: " + string(row[3]) + "\n";
-            output += "status: " + string(row[4]) + "\n";
-            output += "-------------------\n";
+        string response = "";
+        while ((row = mysql_fetch_row(result)) != NULL) {
+            response += "明细编号: ";
+            response += row[0];
+            response += "    交换状态:";
+            response += row[5];
+            response += "\n";
+            response += "制品编号: ";
+            response += row[2];
+            response += "    制品名称";
+            response += row[3]?row[3]:"NULL";
+            response += "\n";
+            response += "申请数量:";
+            response += row[1];
+            response += "    制品余量:";
+            response += row[4];
+            response += "\n";
+            response += "~~~~~~~俺是分割线~~~~~~~\n";
         }
-
-        if (output.empty()) {
-            output = "还没有Meowryo和你交换哦~快去寻找同好叭~  ";
+        if (response.empty()) {
+            response = "还没有Meowryo和你交换~快去寻找同好叭！";
         }
+        res.set_content(response, "text/plain;charset=UTF-8");
         mysql_free_result(result);
         mysql_close(conn);
-        res.set_content(output, "text/plain");
+
         });
     //处理申请
     svr.Post("/exchange/handle", [](const Request& req, Response& res) {
