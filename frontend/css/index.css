@@ -1,0 +1,132 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Nunito", "Microsoft YaHei", sans-serif;
+}
+
+body {
+    background-color: #efe4b6;
+    color: #222;
+}
+
+.page {
+    min-height: 100vh;
+}
+
+/* 顶部栏 */
+.topbar {
+    height: 90px;
+    border-bottom: 2px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    background-color: #efe4b6;
+}
+
+.logo {
+    font-size: 42px;
+    font-weight: 700;
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.search-box input {
+    width: 240px;
+    height: 40px;
+    padding: 0 14px;
+    border: 1px solid #999;
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+}
+
+.search-box button {
+    height: 40px;
+    padding: 0 18px;
+    border: none;
+    border-radius: 8px;
+    background-color: #4094d0;
+    color: white;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.search-box button:hover {
+    background-color: #2f7db5;
+}
+
+/* 主体 */
+.main {
+    display: flex;
+    min-height: calc(100vh - 90px);
+}
+
+/* 左侧栏 */
+.sidebar {
+    width: 220px;
+    border-right: 2px solid #333;
+    padding-top: 30px;
+    background-color: #efe4b6;
+}
+
+.sidebar ul {
+    list-style: none;
+}
+
+.sidebar li {
+    padding: 18px 30px;
+    font-size: 28px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.sidebar li:hover {
+    background-color: rgba(255, 255, 255, 0.35);
+}
+
+.sidebar li.active {
+    font-weight: bold;
+}
+
+/* 右侧内容区 */
+.content {
+    flex: 1;
+    padding: 40px;
+}
+
+.content h1 {
+    text-align: center;
+    font-size: 46px;
+    margin-bottom: 35px;
+    font-weight: 600;
+}
+
+/* 制品列表 */
+.item-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 24px;
+}
+
+.item-card {
+    background-color: #f7f7f7;
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.item-card h3 {
+    font-size: 24px;
+    margin-bottom: 12px;
+}
+
+.item-card p {
+    font-size: 16px;
+    margin-bottom: 8px;
+}

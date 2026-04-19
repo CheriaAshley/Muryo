@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>欢迎来到Muryo~ </title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/login.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
 
@@ -12,12 +13,21 @@
 
     <div class="formbox">
         <h2>欢迎来到Muryo~</h2>
-        <input type="text" id="username" placeholder="请输入咪的用户名">
-        <input type="password" id="password" placeholder="请咪输入密码，注意区分大小写哟~">
-
-        <button onclick="login()">登录</button>
-
-        <p>还没有使用过Muryo？<a href="register.html">来注册成为Meowryo吧！</a></p>
+    <form onsubmit="login(); return false;">
+        <input type="text" id="username" name="username" placeholder="请输入咪的用户名">
+        <input type="password" id="password" name="password" placeholder="请咪输入密码，注意区分大小写哟~">
+        <script>
+            document.getElementById("username").addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault(); // 防止表单提交
+                document.getElementById("password").focus();
+             }
+            });
+        </script>
+    <button type="submit">登录</button>
+    </form>
+    <p id="msg"></p>
+        <p>还没有使用过Muryo？<a href="register.html">点击这里注册成为Meowryo吧！</a></p>
     </div>
 </div>
 

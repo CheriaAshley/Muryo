@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册 Muryo 账号</title>
+    <link rel="stylesheet" href="css/login.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="container">
+    <div class="formbox">
+        <h2>加入 Muryo ~</h2>
+
+        <form onsubmit="register(); return false;">
+            <input type="text" id="username" name="username" placeholder="咪请输入想注册的用户名~">
+            <input type="password" id="password" name="password" placeholder="请输入密码">
+            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="咪再次确认一下密码~">
+            <script>
+            document.getElementById("username").addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault(); // 防止表单提交
+                document.getElementById("password").focus();
+             }
+            });
+        </script>
+        <script>
+            document.getElementById("password").addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault(); // 防止表单提交
+                document.getElementById("confirmPassword").focus();
+             }
+            });
+        </script>
+            <button type="submit">注册</button>
+        </form>
+
+        <p id="msg"></p>
+
+        <p>已经有账号了？<a href="login.html">回到登录</a></p>
+    </div>
+</div>
+
+<script src="js/register.js"></script>
+
+</body>
+</html>
