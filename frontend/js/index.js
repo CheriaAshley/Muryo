@@ -19,13 +19,17 @@ function loadItems() {
                 card.className = "item-card";
 
                 card.innerHTML = `
-                    <h3>${item.item_name}</h3>
-                    <p>厨子：${item.owner}</p>
-                    <p>角色：${item.item_role}</p>
-                    <p>类型：${item.item_type}</p>
-                    <p>剩余数量：${item.quantity}</p>
-                    <p>介绍：${item.description || "暂无介绍"}</p>
+                    <h3>${item.item_name || "默认名称"}</h3>
+                    <p>厨子：${item.owner_name || "未知用户"}</p>
+                    <p>角色：${item.role || "默认角色"}</p>
+                    <p>类型：${item.type || "默认类型"}</p>
+                    <p>剩余数量：${item.quantity || 0}</p>
+                    <p>介绍：${item.intro || "暂无介绍"}</p>
                 `;
+
+                card.onclick = function () {
+                    window.location.href = `detail.html?item_id=${item.item_id}`;
+                };
 
                 itemList.appendChild(card);
             });

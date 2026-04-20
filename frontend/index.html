@@ -11,53 +11,35 @@
 
 <div class="page">
 
-    <!-- 顶部栏 -->
     <header class="topbar">
         <div class="logo">Muryo ~</div>
 
         <div class="search-box">
-            <input type="text" id="searchInput" placeholder="搜索制品">
+            <input type="text" id="searchInput" placeholder="搜索制品或厨子">
             <button onclick="searchItems()">搜索</button>
         </div>
     </header>
 
-    <!-- 主体区域 -->
     <div class="main">
 
-        <!-- 左侧功能栏 -->
         <aside class="sidebar">
             <ul>
-                <li class="active">我的主页</li>
+                <li class="active">首页</li>
+                <li>我的主页</li>
                 <li>我的申请</li>
                 <li>我的交换</li>
                 <li>待办申请</li>
             </ul>
         </aside>
 
-        <!-- 右侧内容区 -->
         <section class="content">
-            <h1>制品列表</h1>
+            <div class="content-header">
+                <h1>制品广场</h1>
+                <p>这里展示当前可以交换的制品</p>
+            </div>
 
             <div class="item-list" id="itemList">
-                <div class="item-card">
-                    <h3>吧唧</h3>
-                    <p>角色：阿米娅</p>
-                    <p>材质：马口铁</p>
-                    <p>数量：5</p>
-                </div>
-
-                <div class="item-card">
-                    <h3>明信片</h3>
-                    <p>角色：能天使</p>
-                    <p>材质：纸质</p>
-                    <p>数量：8</p>
-                </div>
-
-                <div class="item-card">
-                    <h3>透卡</h3>
-                    <p>角色：银灰</p>
-                    <p>材质：PVC</p>
-                    <p>数量：3</p>
+                
                 </div>
             </div>
         </section>

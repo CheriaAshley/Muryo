@@ -48,6 +48,35 @@ void set_cors(Response& res) {
     res.set_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
     res.set_header("Access-Control-Allow-Headers", "Content-Type");
 }
+// 解决 JSON 特殊字符问题
+string escape_json(const string& input) {
+    string output;
+    output.reserve(input.size() + 10);
+
+    for (char c : input) {
+        switch (c) {
+        case '\"': output += "\\\""; break;
+        case '\\': output += "\\\\"; break;
+        case '\b': output += "\\b"; break;
+        case '\f': output += "\\f"; break;
+        case '\n': output += "\\n"; break;
+        case '\r': output += "\\r"; break;
+        case '\t': output += "\\t"; break;
+        default:
+            // 控制字符过滤
+            if (static_cast<unsigned char>(c) < 0x20) {
+                // 跳过不可见控制字符
+            }
+            else {
+                output += c;
+            }
+            break;
+        }
+    }
+
+    return output;
+}
+
 int main() {
     system("chcp 65001");
     Server svr;
@@ -614,23 +643,50 @@ int main() {
     // 查看所有制品列表
     svr.Get("/items", [](const Request& req, Response& res) {
         set_cors(res);
+
         MYSQL* conn = connect_db();
         if (conn == NULL) {
-            res.set_content("{\"success\":false,\"message\":\"数据库连接失败\"}", "application/json;charset=UTF-8");
+            res.set_content(
+                "{\"success\":false,\"message\":\"数据库连接失败\"}",
+                "application/json;charset=UTF-8"
+            );
             return;
         }
 
-        string sql = "SELECT * FROM item WHERE status = 0 AND quantity > 0";
+        // 联表查用户名，不再只返回 owner 的数字 ID
+        string sql =
+            "SELECT "
+            "i.item_id, "
+            "IFNULL(NULLIF(u.user_name, ''), '未知用户') AS owner_name, "
+            "IFNULL(NULLIF(i.item_name, ''), '默认名称') AS item_name, "
+            "IFNULL(NULLIF(i.role, ''), '默认角色') AS role, "
+            "IFNULL(NULLIF(i.type, ''), '默认类型') AS type, "
+            "i.quantity, "
+            "IFNULL(NULLIF(i.image_url, ''), '') AS image_url, "
+            "IFNULL(NULLIF(i.intro, ''), '暂无介绍') AS intro "
+            "FROM item i "
+            "LEFT JOIN `user` u ON i.owner = u.user_id "
+            "WHERE i.status = 0 AND i.quantity > 0";
 
         if (mysql_query(conn, sql.c_str())) {
-            res.set_content("{\"success\":false,\"message\":\"请求失败\"}", "application/json;charset=UTF-8");
+            string err = mysql_error(conn);
+            err = escape_json(err);
+
+            string json =
+                "{\"success\":false,\"message\":\"请求失败\",\"error\":\"" + err + "\"}";
+            res.set_content(json, "application/json;charset=UTF-8");
             mysql_close(conn);
             return;
         }
 
         MYSQL_RES* result = mysql_store_result(conn);
         if (result == NULL) {
-            res.set_content("{\"success\":false,\"message\":\"请求结果失败\"}", "application/json;charset=UTF-8");
+            string err = mysql_error(conn);
+            err = escape_json(err);
+
+            string json =
+                "{\"success\":false,\"message\":\"请求结果失败\",\"error\":\"" + err + "\"}";
+            res.set_content(json, "application/json;charset=UTF-8");
             mysql_close(conn);
             return;
         }
@@ -639,15 +695,24 @@ int main() {
         string json = "[";
 
         while ((row = mysql_fetch_row(result))) {
+            string item_id = row[0] ? row[0] : "";
+            string owner_name = row[1] ? row[1] : "";
+            string item_name = row[2] ? row[2] : "";
+            string role = row[3] ? row[3] : "";
+            string type = row[4] ? row[4] : "";
+            string quantity = row[5] ? row[5] : "0";
+            string image_url = row[6] ? row[6] : "";
+            string intro = row[7] ? row[7] : "";
+
             json += "{";
-            json += "\"item_id\":\"" + string(row[0] ? row[0] : "") + "\",";
-            json += "\"owner\":\"" + string(row[1] ? row[1] : "") + "\",";
-            json += "\"item_name\":\"" + string(row[2] ? row[2] : "") + "\",";
-            json += "\"item_role\":\"" + string(row[3] ? row[3] : "") + "\",";
-            json += "\"item_type\":\"" + string(row[4] ? row[4] : "") + "\",";
-            json += "\"quantity\":\"" + string(row[5] ? row[5] : "") + "\",";
-            json += "\"item_img\":\"" + string(row[7] ? row[7] : "") + "\",";
-            json += "\"description\":\"" + string(row[8] ? row[8] : "") + "\"";
+            json += "\"item_id\":\"" + escape_json(item_id) + "\",";
+            json += "\"owner_name\":\"" + escape_json(owner_name) + "\",";
+            json += "\"item_name\":\"" + escape_json(item_name) + "\",";
+            json += "\"role\":\"" + escape_json(role) + "\",";
+            json += "\"type\":\"" + escape_json(type) + "\",";
+            json += "\"quantity\":\"" + escape_json(quantity) + "\",";
+            json += "\"image_url\":\"" + escape_json(image_url) + "\",";
+            json += "\"intro\":\"" + escape_json(intro) + "\"";
             json += "},";
         }
 
@@ -720,6 +785,89 @@ int main() {
         mysql_close(conn);
 
         res.set_content(output, "text/plain;charset=UTF-8");
+        });
+    //查看制品详情
+    svr.Get("/item/detail", [](const Request& req, Response& res) {
+        set_cors(res);
+
+        string item_id = req.get_param_value("item_id");
+        if (item_id.empty()) {
+            res.set_content(
+                "{\"success\":false,\"message\":\"缺少item_id参数\"}",
+                "application/json;charset=UTF-8"
+            );
+            return;
+        }
+
+        MYSQL* conn = connect_db();
+        if (conn == NULL) {
+            res.set_content(
+                "{\"success\":false,\"message\":\"数据库连接失败\"}",
+                "application/json;charset=UTF-8"
+            );
+            return;
+        }
+
+        string sql =
+            "SELECT "
+            "i.item_id, "
+            "IFNULL(NULLIF(u.user_name, ''), '未知用户') AS owner_name, "
+            "IFNULL(NULLIF(i.item_name, ''), '默认名称') AS item_name, "
+            "IFNULL(NULLIF(i.role, ''), '默认角色') AS role, "
+            "IFNULL(NULLIF(i.type, ''), '默认类型') AS type, "
+            "i.quantity, "
+            "IFNULL(NULLIF(i.image_url, ''), '') AS item_img, "
+            "IFNULL(NULLIF(i.intro, ''), '暂无介绍') AS intro "
+            "FROM item i "
+            "LEFT JOIN `user` u ON i.owner = u.user_id "
+            "WHERE i.item_id = " + item_id + " LIMIT 1";
+
+        if (mysql_query(conn, sql.c_str())) {
+            string err = mysql_error(conn);
+            string json = "{\"success\":false,\"message\":\"查询失败\",\"error\":\"" + err + "\"}";
+            res.set_content(json, "application/json;charset=UTF-8");
+            mysql_close(conn);
+            return;
+        }
+
+        MYSQL_RES* result = mysql_store_result(conn);
+        if (result == NULL) {
+            string err = mysql_error(conn);
+            string json = "{\"success\":false,\"message\":\"获取结果失败\",\"error\":\"" + err + "\"}";
+            res.set_content(json, "application/json;charset=UTF-8");
+            mysql_close(conn);
+            return;
+        }
+
+        MYSQL_ROW row = mysql_fetch_row(result);
+
+        if (row == NULL) {
+            res.set_content(
+                "{\"success\":false,\"message\":\"没有找到该制品\"}",
+                "application/json;charset=UTF-8"
+            );
+            mysql_free_result(result);
+            mysql_close(conn);
+            return;
+        }
+
+        string json = "{";
+        json += "\"success\":true,";
+        json += "\"data\":{";
+        json += "\"item_id\":\"" + string(row[0] ? row[0] : "") + "\",";
+        json += "\"owner_name\":\"" + string(row[1] ? row[1] : "") + "\",";
+        json += "\"item_name\":\"" + string(row[2] ? row[2] : "") + "\",";
+        json += "\"role\":\"" + string(row[3] ? row[3] : "") + "\",";
+        json += "\"type\":\"" + string(row[4] ? row[4] : "") + "\",";
+        json += "\"quantity\":\"" + string(row[5] ? row[5] : "") + "\",";
+        json += "\"item_img\":\"" + string(row[6] ? row[6] : "") + "\",";
+        json += "\"intro\":\"" + string(row[7] ? row[7] : "") + "\"";
+        json += "}}";
+
+        mysql_free_result(result);
+        mysql_close(conn);
+
+        res.set_content(json, "application/json;charset=UTF-8");
         });
     // 删除制品
     svr.Post("/items/delete", [](const Request& req, Response& res) {

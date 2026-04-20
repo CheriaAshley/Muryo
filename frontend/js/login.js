@@ -20,6 +20,7 @@ function login() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+            sessionStorage.setItem("user_id", data.user_id);
             alert("登录成功！");
             localStorage.setItem("username", username);
             window.location.replace ( "index.html");
