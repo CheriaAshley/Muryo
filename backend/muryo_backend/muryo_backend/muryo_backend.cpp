@@ -2,9 +2,12 @@
 #include <string>
 #include "httplib.h"//HTTP服务器库
 #include <mysql.h>//MySQl数据库接口
+#include <json/json.h>
+
 
 using namespace httplib;//必须使用和std不同
 using namespace std;
+
 MYSQL* connect_db() {//链接数据库并返回连接对象
     MYSQL* conn = mysql_init(NULL);//创建初始化连接结构返回地址
     if (conn == NULL) {
@@ -146,16 +149,30 @@ int main() {
         string user_name = req.get_param_value("user_name");
         string password = req.get_param_value("password");
 
-        MYSQL* conn = connect_db();
-        if (conn == NULL) {
-            res.set_content("{\"success\":false,\"message\":\"数据库连接失败\"}", "application/json; charset=UTF-8");
+        if (user_name.empty() || password.empty()) {
+            res.set_content(
+                "{\"success\":false,\"message\":\"用户名和密码不能为空\"}",
+                "application/json; charset=UTF-8"
+            );
             return;
         }
 
-        string sql = "SELECT * FROM user WHERE user_name='" + user_name + "' AND password='" + password + "'";
+        MYSQL* conn = connect_db();
+        if (conn == NULL) {
+            res.set_content(
+                "{\"success\":false,\"message\":\"数据库连接失败\"}",
+                "application/json; charset=UTF-8"
+            );
+            return;
+        }
+
+        string sql = "SELECT user_id, user_name FROM user WHERE user_name='" + user_name + "' AND password='" + password + "'";
 
         if (mysql_query(conn, sql.c_str())) {
-            res.set_content("{\"success\":false,\"message\":\"请求失败\"}", "application/json; charset=UTF-8");
+            res.set_content(
+                "{\"success\":false,\"message\":\"请求失败\"}",
+                "application/json; charset=UTF-8"
+            );
             mysql_close(conn);
             return;
         }
@@ -163,7 +180,10 @@ int main() {
         MYSQL_RES* result = mysql_store_result(conn);
 
         if (result == NULL) {
-            res.set_content("{\"success\":false,\"message\":\"查询失败\"}", "application/json; charset=UTF-8");
+            res.set_content(
+                "{\"success\":false,\"message\":\"查询失败\"}",
+                "application/json; charset=UTF-8"
+            );
             mysql_close(conn);
             return;
         }
@@ -171,10 +191,23 @@ int main() {
         MYSQL_ROW row = mysql_fetch_row(result);
 
         if (row) {
-            res.set_content("{\"success\":true,\"message\":\"登录成功！欢迎来到Muryo！\"}", "application/json; charset=UTF-8");
+            string user_id = row[0] ? row[0] : "";
+            string user_name_db = row[1] ? row[1] : "";
+
+            string json = "{";
+            json += "\"success\":true,";
+            json += "\"message\":\"登录成功！欢迎来到Muryo！\",";
+            json += "\"user_id\":" + user_id + ",";
+            json += "\"user_name\":\"" + user_name_db + "\"";
+            json += "}";
+
+            res.set_content(json, "application/json; charset=UTF-8");
         }
         else {
-            res.set_content("{\"success\":false,\"message\":\"登录失败，咪请检查账号密码或是否注册~\"}", "application/json; charset=UTF-8");
+            res.set_content(
+                "{\"success\":false,\"message\":\"登录失败，咪请检查账号密码或是否注册~\"}",
+                "application/json; charset=UTF-8"
+            );
         }
 
         mysql_free_result(result);
@@ -576,70 +609,110 @@ int main() {
             res.set_content("咪已经拒绝该申请~", "text/plain;charset=UTF-8");
         }
         });
-    //查看自己发出的申请
-    svr.Get("/exchange/outgoing", [](const Request& req, Response& res) {
-        string utostr = req.get_param_value("uto");
-        int uto;
+        // 查看自己发出的申请
+        svr.Get("/exchange/outgoing", [](const Request& req, Response& res) {
+            set_cors(res);
 
-        try {
-            uto = stoi(utostr);
-        }
-        catch (...) {
-            res.set_content("请输入正确的用户ID哟~", "text/plain;charset=UTF-8");
-            return;
-        }
+            Json::Value response_json;
 
-        MYSQL* conn = connect_db();
-        if (conn == NULL) {
-            res.set_content("数据库连接失败", "text/plain;charset=UTF-8");
-            return;
-        }
-        string sql = "SELECT e.detail_id,e.quantity,e.item_id,i.item_name,i.quantity AS 'left',a.status FROM exdetail e JOIN item i ON e.item_id = i.item_id JOIN exchange a ON e.exchange_id = a.exchange_id WHERE a.uto = " + utostr;
+            string utostr = req.get_param_value("uto");
+            int uto;
 
-        if (mysql_query(conn, sql.c_str())) {
-            cout << "请求失败: " << mysql_error(conn) << endl;
-            res.set_content(string("查询失败: ") + mysql_error(conn), "text/plain;charset=UTF-8");
+            try {
+                uto = stoi(utostr);
+            }
+            catch (...) {
+                response_json["success"] = false;
+                response_json["message"] = "请输入正确的用户ID哟~";
+                response_json["data"] = Json::Value(Json::arrayValue);
+
+                res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                return;
+            }
+
+            MYSQL* conn = connect_db();
+            if (conn == NULL) {
+                response_json["success"] = false;
+                response_json["message"] = "数据库连接失败";
+                response_json["data"] = Json::Value(Json::arrayValue);
+
+                res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                return;
+            }
+
+            string sql =
+                "SELECT "
+                "a.exchange_id, "
+                "e.detail_id, "
+                "e.item_id, "
+                "i.item_name, "
+                "e.quantity AS apply_quantity, "
+                "i.quantity AS left_quantity, "
+                "a.status "
+                "FROM exdetail e "
+                "JOIN item i ON e.item_id = i.item_id "
+                "JOIN exchange a ON e.exchange_id = a.exchange_id "
+                "WHERE a.uto = " + to_string(uto) + " "
+                "ORDER BY "
+                "CASE "
+                "WHEN a.status = 0 THEN 0 "
+                "WHEN a.status = 2 THEN 1 "
+                "ELSE 2 "
+                "END, "
+                "CASE "
+                "WHEN a.status IN (1,3,4) THEN e.detail_id "
+                "ELSE 0 "
+                "END DESC, "
+                "a.exchange_id DESC";
+
+            if (mysql_query(conn, sql.c_str())) {
+                response_json["success"] = false;
+                response_json["message"] = string("查询失败: ") + mysql_error(conn);
+                response_json["data"] = Json::Value(Json::arrayValue);
+
+                res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                mysql_close(conn);
+                return;
+            }
+
+            MYSQL_RES* result = mysql_store_result(conn);
+            if (result == NULL) {
+                response_json["success"] = false;
+                response_json["message"] = string("获取结果失败: ") + mysql_error(conn);
+                response_json["data"] = Json::Value(Json::arrayValue);
+
+                res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                mysql_close(conn);
+                return;
+            }
+
+            MYSQL_ROW row;
+            Json::Value data(Json::arrayValue);
+
+            while ((row = mysql_fetch_row(result)) != NULL) {
+                Json::Value item;
+
+                item["exchange_id"] = row[0] ? atoi(row[0]) : 0;
+                item["detail_id"] = row[1] ? atoi(row[1]) : 0;
+                item["item_id"] = row[2] ? atoi(row[2]) : 0;
+                item["item_name"] = row[3] ? row[3] : "";
+                item["apply_quantity"] = row[4] ? atoi(row[4]) : 0;
+                item["left_quantity"] = row[5] ? atoi(row[5]) : 0;
+                item["status"] = row[6] ? atoi(row[6]) : -1;
+
+                data.append(item);
+            }
+
+            response_json["success"] = true;
+            response_json["message"] = data.size() == 0 ? "还没有提交过任何申请" : "查询成功";
+            response_json["data"] = data;
+
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+
+            mysql_free_result(result);
             mysql_close(conn);
-            return;
-        }
-
-        MYSQL_RES* result = mysql_store_result(conn);
-
-        if (result == NULL) {
-            cout << "获取结果失败: " << mysql_error(conn) << endl;
-            res.set_content(string("查询失败: ") + mysql_error(conn), "text/plain;charset=UTF-8");
-            mysql_close(conn);
-            return;
-        }
-
-        MYSQL_ROW row;
-        string response = "";
-        while ((row = mysql_fetch_row(result)) != NULL) {
-            response += "明细编号: ";
-            response += row[0];
-            response += "    交换状态:";
-            response += row[5];
-            response += "\n";
-            response += "制品编号: ";
-            response += row[2];
-            response += "    制品名称";
-            response += row[3] ? row[3] : "NULL";
-            response += "\n";
-            response += "申请数量:";
-            response += row[1];
-            response += "    制品余量:";
-            response += row[4];
-            response += "\n";
-            response += "~~~~~~~俺是分割线~~~~~~~\n";
-        }
-        if (response.empty()) {
-            response = "咪还没有申请交换过任何制品！快去寻找心仪的制品吧！";
-        }
-        res.set_content(response, "text/plain;charset=UTF-8");
-        mysql_free_result(result);
-        mysql_close(conn);
-
-        });
+            });
+    
     // 查看所有制品列表
     svr.Get("/items", [](const Request& req, Response& res) {
         set_cors(res);
@@ -726,8 +799,17 @@ int main() {
 
         res.set_content(json, "application/json;charset=UTF-8");
         });
-    //查看我的制品
+    // 查看我的制品
     svr.Get("/items/my", [](const Request& req, Response& res) {
+        set_cors(res);
+
+        if (!req.has_param("owner")) {
+            res.set_content(
+                "{\"success\":false,\"message\":\"缺少owner参数\"}",
+                "application/json; charset=UTF-8"
+            );
+            return;
+        }
 
         string ownerstr = req.get_param_value("owner");
         int owner;
@@ -736,55 +818,79 @@ int main() {
             owner = stoi(ownerstr);
         }
         catch (...) {
-            res.set_content("请输入有效的用户名", "text/plain;charset=UTF-8");
+            res.set_content(
+                "{\"success\":false,\"message\":\"请输入有效的用户ID\"}",
+                "application/json; charset=UTF-8"
+            );
             return;
         }
 
         MYSQL* conn = connect_db();
         if (conn == NULL) {
-            res.set_content("数据库连接失败", "text/plain;charset=UTF-8");
+            res.set_content(
+                "{\"success\":false,\"message\":\"数据库连接失败\"}",
+                "application/json; charset=UTF-8"
+            );
             return;
         }
 
-        string sql = "SELECT * "
-            "FROM item WHERE status<> 2 AND owner = " + to_string(owner);
+        string sql = "SELECT item_id, owner, item_name, role, type, quantity, status, image_url, intro "
+            "FROM item WHERE status <> 2 AND owner = " + to_string(owner);
 
         if (mysql_query(conn, sql.c_str())) {
-            res.set_content("请求失败", "text/plain;charset=UTF-8");
+            cout << "SQL执行失败: " << mysql_error(conn) << endl;
+            res.set_content(
+                "{\"success\":false,\"message\":\"请求失败\"}",
+                "application/json; charset=UTF-8"
+            );
             mysql_close(conn);
             return;
         }
 
         MYSQL_RES* result = mysql_store_result(conn);
         if (result == NULL) {
-            res.set_content("拉取结果失败", "text/plain;charset=UTF-8");
+            cout << "结果获取失败: " << mysql_error(conn) << endl;
+            res.set_content(
+                "{\"success\":false,\"message\":\"拉取结果失败\"}",
+                "application/json; charset=UTF-8"
+            );
             mysql_close(conn);
             return;
         }
 
-        string output = "";
+        string json = "[";
         MYSQL_ROW row;
+        bool first = true;
 
         while ((row = mysql_fetch_row(result))) {
-            output += "item_id: " + string(row[0]) + "\n";
-            //output += "owner: " + string(row[1]) + "\n";
-            output += "name: " + string(row[2]) + "\n";
-            output += "role: " + string(row[3]) + "\n";
-            output += "type: " + string(row[4]) + "\n";
-            output += "count: " + string(row[5]) + "\n";
-            output += "image: " + string(row[7] ? row[7] : " ") + "\n";
-            output += "intro: " + string(row[8] ? row[8] : " ") + "\n";
-            output += "----------------------\n";
+            if (!first) json += ",";
+            first = false;
+
+            string item_name = row[2] ? row[2] : "";
+            string role = row[3] ? row[3] : "";
+            string type = row[4] ? row[4] : "";
+            string image_url = row[7] ? row[7] : "";
+            string intro = row[8] ? row[8] : "";
+
+            json += "{";
+            json += "\"item_id\":" + string(row[0] ? row[0] : "0") + ",";
+            json += "\"owner\":" + string(row[1] ? row[1] : "0") + ",";
+            json += "\"item_name\":\"" + item_name + "\",";
+            json += "\"role\":\"" + role + "\",";
+            json += "\"type\":\"" + type + "\",";
+            json += "\"quantity\":" + string(row[5] ? row[5] : "0") + ",";
+            json += "\"status\":" + string(row[6] ? row[6] : "0") + ",";
+            json += "\"image_url\":\"" + image_url + "\",";
+            json += "\"intro\":\"" + intro + "\"";
+            json += "}";
         }
 
-        if (output.empty()) {
-            output = "咪还没有发布制品~快去和同好分享美味家产叭！";
-        }
+        json += "]";
 
         mysql_free_result(result);
         mysql_close(conn);
 
-        res.set_content(output, "text/plain;charset=UTF-8");
+        res.set_content(json, "application/json; charset=UTF-8");
         });
     //查看制品详情
     svr.Get("/item/detail", [](const Request& req, Response& res) {
@@ -955,6 +1061,77 @@ int main() {
 
         mysql_close(conn);
         res.set_content("制品删除成功，期待咪的下一次产粮……", "text/plain;charset=UTF-8");
+        });
+    // 查看个人信息
+    svr.Get("/user/profile", [](const Request& req, Response& res) {
+        set_cors(res);
+
+        string user_id_str = req.get_param_value("user_id");
+        int user_id;
+
+        try {
+            user_id = stoi(user_id_str);
+        }
+        catch (...) {
+            res.set_content(
+                "{\"success\":false,\"message\":\"user_id无效\"}",
+                "application/json; charset=UTF-8"
+            );
+            return;
+        }
+
+        MYSQL* conn = connect_db();
+        if (conn == NULL) {
+            res.set_content(
+                "{\"success\":false,\"message\":\"数据库连接失败\"}",
+                "application/json; charset=UTF-8"
+            );
+            return;
+        }
+
+        string sql = "SELECT user_id, user_name, contact, introduction FROM user WHERE user_id = " + to_string(user_id);
+
+        if (mysql_query(conn, sql.c_str())) {
+            res.set_content(
+                "{\"success\":false,\"message\":\"查询失败\"}",
+                "application/json; charset=UTF-8"
+            );
+            mysql_close(conn);
+            return;
+        }
+
+        MYSQL_RES* result = mysql_store_result(conn);
+        if (result == NULL) {
+            res.set_content(
+                "{\"success\":false,\"message\":\"获取结果失败\"}",
+                "application/json; charset=UTF-8"
+            );
+            mysql_close(conn);
+            return;
+        }
+
+        MYSQL_ROW row = mysql_fetch_row(result);
+
+        if (row) {
+            string json = "{";
+            json += "\"success\":true,";
+            json += "\"user_id\":" + string(row[0] ? row[0] : "0") + ",";
+            json += "\"user_name\":\"" + string(row[1] ? row[1] : "") + "\",";
+            json += "\"contact\":\"" + string(row[2] ? row[2] : "") + "\",";
+            json += "\"introduction\":\"" + string(row[3] ? row[3] : "") + "\"";
+            json += "}";
+
+            res.set_content(json, "application/json; charset=UTF-8");
+        }
+        else {
+            res.set_content(
+                "{\"success\":false,\"message\":\"未找到该用户\"}",
+                "application/json; charset=UTF-8"
+            );
+        }
+
+        mysql_free_result(result);
+        mysql_close(conn);
         });
     cout << "Server running at http://127.0.0.1:8080;" << endl;
     svr.listen("127.0.0.1", 8080);

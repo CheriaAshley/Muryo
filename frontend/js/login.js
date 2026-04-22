@@ -20,10 +20,12 @@ function login() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            sessionStorage.setItem("user_id", data.user_id);
+            // 统一保存登录信息
+            localStorage.setItem("user_id", data.user_id);
+            localStorage.setItem("user_name", data.user_name);
+
             alert("登录成功！");
-            localStorage.setItem("username", username);
-            window.location.replace ( "index.html");
+            window.location.replace("index.html");
         } else {
             msg.innerText = data.message || "用户名或密码错误";
         }

@@ -1,6 +1,25 @@
 window.onload = function () {
+    updateLoginButtons();
     loadItems();
 };
+
+function updateLoginButtons() {
+    const user = getCurrentUser();
+
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const welcomeText = document.getElementById("welcomeText");
+
+    if (user.user_id && user.user_name) {
+        if (loginBtn) loginBtn.style.display = "none";
+        if (logoutBtn) logoutBtn.style.display = "inline-block";
+        if (welcomeText) welcomeText.innerText = "欢迎你，" + user.user_name;
+    } else {
+        if (loginBtn) loginBtn.style.display = "inline-block";
+        if (logoutBtn) logoutBtn.style.display = "none";
+        if (welcomeText) welcomeText.innerText = "";
+    }
+}
 
 function loadItems() {
     fetch("http://127.0.0.1:8080/items")
@@ -9,7 +28,7 @@ function loadItems() {
             const itemList = document.getElementById("itemList");
             itemList.innerHTML = "";
 
-            if (data.length === 0) {
+            if (!Array.isArray(data) || data.length === 0) {
                 itemList.innerHTML = "<p>目前暂无制品</p>";
                 return;
             }
@@ -38,4 +57,18 @@ function loadItems() {
             console.error("加载制品失败:", error);
             document.getElementById("itemList").innerHTML = "<p>加载失败，请检查后端是否启动</p>";
         });
+}
+
+function searchItems() {
+    const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
+    const cards = document.querySelectorAll(".item-card");
+
+    cards.forEach(card => {
+        const text = card.innerText.toLowerCase();
+        if (text.includes(keyword)) {
+            card.style.display = "block";
+        } else {
+            card.style.display = "none";
+        }
+    });
 }
