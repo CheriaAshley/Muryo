@@ -44,10 +44,10 @@ function goMyApply() {
 
 function goMyExchange() {
     if (!checkLogin()) return;
-    window.location.href = "my_exchange.html";
+    window.location.href = "mytrade.html";
 }
 
 function goTodoApply() {
     if (!checkLogin()) return;
-    window.location.href = "todo_apply.html";
+    window.location.href = "todoapply.html";
 }

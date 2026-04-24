@@ -394,221 +394,433 @@ int main() {
         res.set_content("恭喜咪，申请交换成功！", "text/plain;charset=UTF-8");
         mysql_close(conn);
         });
-    //查看收到的申请
-    svr.Get("/exchange/incoming", [](const Request& req, Response& res) {
-        string ufromstr = req.get_param_value("ufrom");
-        int ufrom;
+        // 查看收到的申请（我的交换）
+        svr.Get("/exchange/incoming", [](const Request& req, Response& res) {
+            set_cors(res);
 
-        try {
-            ufrom = stoi(ufromstr);
-        }
-        catch (...) {
-            res.set_content("请输入正确的用户ID哟~", "text/plain;charset=UTF-8");
-            return;
-        }
+            Json::Value response_json;
+            response_json["data"] = Json::Value(Json::arrayValue);
 
-        MYSQL* conn = connect_db();
-        if (conn == NULL) {
-            res.set_content("数据库连接失败", "text/plain;charset=UTF-8");
-            return;
-        }
-        string sql = "SELECT e.detail_id,e.quantity,e.item_id,i.item_name,i.quantity AS 'left',a.status FROM exdetail e JOIN item i ON e.item_id = i.item_id JOIN exchange a ON e.exchange_id = a.exchange_id WHERE i.owner = " + ufromstr;
+            string ufromstr = req.get_param_value("ufrom");
+            int ufrom;
 
-        if (mysql_query(conn, sql.c_str())) {
-            cout << "请求失败: " << mysql_error(conn) << endl;
-            res.set_content(string("查询失败: ") + mysql_error(conn), "text/plain;charset=UTF-8");
-            mysql_close(conn);
-            return;
-        }
+            try {
+                ufrom = stoi(ufromstr);
+            }
+            catch (...) {
+                response_json["success"] = false;
+                response_json["message"] = "请输入正确的用户ID哟~";
+                res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                return;
+            }
 
-        MYSQL_RES* result = mysql_store_result(conn);
+            MYSQL* conn = connect_db();
+            if (conn == NULL) {
+                response_json["success"] = false;
+                response_json["message"] = "数据库连接失败";
+                res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                return;
+            }
 
-        if (result == NULL) {
-            cout << "获取结果失败: " << mysql_error(conn) << endl;
-            res.set_content(string("查询失败: ") + mysql_error(conn), "text/plain;charset=UTF-8");
-            mysql_close(conn);
-            return;
-        }
+            string sql =
+                "SELECT "
+                "e.detail_id, "
+                "e.exchange_id, "
+                "e.item_id, "
+                "i.item_name, "
+                "e.quantity AS apply_quantity, "
+                "i.quantity AS left_quantity, "
+                "a.status, "
+                "a.uto AS applicant_id, "
+                "u.user_name AS applicant_name "
+                "FROM exdetail e "
+                "JOIN item i ON e.item_id = i.item_id "
+                "JOIN exchange a ON e.exchange_id = a.exchange_id "
+                "LEFT JOIN user u ON a.uto = u.user_id "
+                "WHERE i.owner = " + to_string(ufrom) + " "
+                "ORDER BY "
+                "CASE "
+                "WHEN a.status = 0 THEN 0 "
+                "WHEN a.status = 2 THEN 1 "
+                "ELSE 2 "
+                "END ASC, "
+                "CASE "
+                "WHEN a.status IN (1, 3, 4) THEN e.detail_id "
+                "ELSE NULL "
+                "END DESC, "
+                "e.detail_id ASC";
 
-        MYSQL_ROW row;
-        string response = "";
-        while ((row = mysql_fetch_row(result)) != NULL) {
-            response += "明细编号: ";
-            response += row[0];
-            response += "    交换状态:";
-            response += row[5];
-            response += "\n";
-            response += "制品编号: ";
-            response += row[2];
-            response += "    制品名称";
-            response += row[3]?row[3]:"NULL";
-            response += "\n";
-            response += "申请数量:";
-            response += row[1];
-            response += "    制品余量:";
-            response += row[4];
-            response += "\n";
-            response += "~~~~~~~俺是分割线~~~~~~~\n";
-        }
-        if (response.empty()) {
-            response = "还没有Meowryo和你交换~快去寻找同好叭！";
-        }
-        res.set_content(response, "text/plain;charset=UTF-8");
-        mysql_free_result(result);
-        mysql_close(conn);
+            if (mysql_query(conn, sql.c_str())) {
+                cout << "查询失败: " << mysql_error(conn) << endl;
+                response_json["success"] = false;
+                response_json["message"] = string("查询失败: ") + mysql_error(conn);
+                mysql_close(conn);
+                res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                return;
+            }
 
-        });
-    //处理申请
-    svr.Post("/exchange/handle", [](const Request& req, Response& res) {
-        string exchange_idstr = req.get_param_value("exchange_id");
-        string action = req.get_param_value("action");
-        string ufromstr = req.get_param_value("ufrom");
-        int exchange_id;
+            MYSQL_RES* result = mysql_store_result(conn);
+            if (result == NULL) {
+                cout << "获取结果失败: " << mysql_error(conn) << endl;
+                response_json["success"] = false;
+                response_json["message"] = string("获取结果失败: ") + mysql_error(conn);
+                mysql_close(conn);
+                res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                return;
+            }
 
-        try {
-            exchange_id = stoi(exchange_idstr);
-        }
-        catch (...) {
-            res.set_content("无效的交换编号！", "text/plain;charset=UTF-8");
-            return;
-        }
+            MYSQL_ROW row;
+            while ((row = mysql_fetch_row(result)) != NULL) {
+                Json::Value item;
 
-        if (action != "agree" && action != "reject") {
-            res.set_content("无效的操作！", "text/plain;charset=UTF-8");
-            return;
-        }
+                item["detail_id"] = row[0] ? stoi(row[0]) : 0;
+                item["exchange_id"] = row[1] ? stoi(row[1]) : 0;
+                item["item_id"] = row[2] ? stoi(row[2]) : 0;
+                item["item_name"] = row[3] ? row[3] : "暂无名称";
+                item["apply_quantity"] = row[4] ? stoi(row[4]) : 0;
+                item["left_quantity"] = row[5] ? stoi(row[5]) : 0;
+                item["status"] = row[6] ? stoi(row[6]) : -1;
+                item["applicant_id"] = row[7] ? stoi(row[7]) : 0;
+                item["applicant_name"] = row[8] ? row[8] : "未知用户";
 
-        MYSQL* conn = connect_db();
-        if (conn == NULL) {
-            res.set_content("数据库连接失败", "text/plain;charset=UTF-8");
-            return;
-        }
+                response_json["data"].append(item);
+            }
 
-        // 开启事务
-        if (mysql_query(conn, "START TRANSACTION")) {
-            res.set_content("事务开启失败！", "text/plain;charset=UTF-8");
-            mysql_close(conn);
-            return;
-        }
+            if (response_json["data"].size() == 0) {
+                response_json["success"] = true;
+                response_json["message"] = "还没有人向你发起交换申请哦~";
+            }
+            else {
+                response_json["success"] = true;
+                response_json["message"] = "获取我的交换成功";
+            }
 
-        string sql_select = "SELECT ufrom, status FROM exchange WHERE exchange_id = " + to_string(exchange_id);
-
-        if (mysql_query(conn, sql_select.c_str())) {
-            mysql_query(conn, "ROLLBACK");
-            res.set_content("请求失败！", "text/plain;charset=UTF-8");
-            mysql_close(conn);
-            return;
-        }
-
-        MYSQL_RES* result = mysql_store_result(conn);
-        if (result == NULL) {
-            mysql_query(conn, "ROLLBACK");
-            res.set_content("结果查询失败！", "text/plain;charset=UTF-8");
-            mysql_close(conn);
-            return;
-        }
-
-        MYSQL_ROW row = mysql_fetch_row(result);
-        if (row == NULL) {
             mysql_free_result(result);
-            mysql_query(conn, "ROLLBACK");
             mysql_close(conn);
-            res.set_content("没有找到对应的交换记录！", "text/plain;charset=UTF-8");
-            return;
-        }
 
-        int ufrom = stoi(row[0]);   
-        int status = stoi(row[1]);
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            });
+            // 处理申请
+            svr.Post("/exchange/handle", [](const Request& req, Response& res) {
+                set_cors(res);
 
-        mysql_free_result(result);
-        if (ufrom != stoi(ufromstr)) {
-            mysql_query(conn, "ROLLBACK");
-            mysql_close(conn);
-            res.set_content("咪只能操作自己收到的交换申请~", "text/plain;charset=UTF-8");
-            return;
-        }
-        if (status == 1) {
-            mysql_query(conn, "ROLLBACK");
-            mysql_close(conn);
-            res.set_content("咪已经拒绝过这条申请啦~", "text/plain;charset=UTF-8");
-            return;
-        }
-        if (status == 2) {
-            mysql_query(conn, "ROLLBACK");
-            mysql_close(conn);
-            res.set_content("咪已经同意申请，等待交换~", "text/plain;charset=UTF-8");
-            return;
-        }
-        if (status == 3) {
-            mysql_query(conn, "ROLLBACK");
-            mysql_close(conn);
-            res.set_content("此次交换已经完成啦~", "text/plain;charset=UTF-8");
-            return;
-        }
-        if (status == 4) {
-            mysql_query(conn, "ROLLBACK");
-            mysql_close(conn);
-            res.set_content("咪已经取消了这次交换~", "text/plain;charset=UTF-8");
-            return;
-        }
+                Json::Value response_json;
 
-        int newstatus = (action == "agree") ? 2 : 1;
-        string sql_update_exchange = "UPDATE exchange SET status = " + to_string(newstatus) +
-            " WHERE exchange_id = " + to_string(exchange_id);
+                string exchange_idstr = req.get_param_value("exchange_id");
+                string action = req.get_param_value("action");
+                string ufromstr = req.get_param_value("ufrom");
 
-        if (mysql_query(conn, sql_update_exchange.c_str())) {
-            mysql_query(conn, "ROLLBACK");
-            res.set_content("数据更新失败！", "text/plain;charset=UTF-8");
-            mysql_close(conn);
-            return;
-        }
-        if (action == "reject") {
-            string sql_de = "SELECT item_id, quantity FROM exdetail WHERE exchange_id = " + exchange_idstr;
+                int exchange_id;
+                int request_ufrom;
 
-            if (mysql_query(conn, sql_de.c_str())) {
-                mysql_query(conn, "ROLLBACK");
-                res.set_content("明细查询失败！", "text/plain;charset=UTF-8");
-                mysql_close(conn);
-                return;
-            }
-            MYSQL_RES* result1 = mysql_store_result(conn);
-            if (result1 == NULL) {
-                mysql_query(conn, "ROLLBACK");
-                res.set_content("明细结果获取失败！", "text/plain;charset=UTF-8");
-                mysql_close(conn);
-                return;
-            }
-            MYSQL_ROW row1;
-            while ((row1 = mysql_fetch_row(result1)) != NULL) {
-                string item_id = row1[0];
-                string count = row1[1];
-                string sql_op = "UPDATE item SET quantity = quantity + " + count +
-                    " WHERE item_id = " + item_id;
-
-                if (mysql_query(conn, sql_op.c_str())) {
-                    mysql_free_result(result1);
-                    mysql_query(conn, "ROLLBACK");
-                    res.set_content("数量更新失败！", "text/plain;charset=UTF-8");
-                    mysql_close(conn);
+                try {
+                    exchange_id = stoi(exchange_idstr);
+                    request_ufrom = stoi(ufromstr);
+                }
+                catch (...) {
+                    response_json["success"] = false;
+                    response_json["message"] = "无效的参数！";
+                    res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
                     return;
                 }
-            }
-            mysql_free_result(result1);
-        }
-        if (mysql_query(conn, "COMMIT")) {
-            mysql_query(conn, "ROLLBACK");
-            res.set_content("事务提交失败！", "text/plain;charset=UTF-8");
-            mysql_close(conn);
-            return;
-        }
-        mysql_close(conn);
-        if (action == "agree") {
-            res.set_content("咪已经同意交换申请，快去交换吧~", "text/plain;charset=UTF-8");
-        }
-        else {
-            res.set_content("咪已经拒绝该申请~", "text/plain;charset=UTF-8");
-        }
-        });
+
+                if (action != "agree" && action != "reject" && action != "complete") {
+                    response_json["success"] = false;
+                    response_json["message"] = "无效的操作！";
+                    res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                    return;
+                }
+
+                MYSQL* conn = connect_db();
+                if (conn == NULL) {
+                    response_json["success"] = false;
+                    response_json["message"] = "数据库连接失败";
+                    res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                    return;
+                }
+
+                if (mysql_query(conn, "START TRANSACTION")) {
+                    response_json["success"] = false;
+                    response_json["message"] = "事务开启失败！";
+                    mysql_close(conn);
+                    res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                    return;
+                }
+
+                string sql_select = "SELECT ufrom, status FROM exchange WHERE exchange_id = " + to_string(exchange_id);
+
+                if (mysql_query(conn, sql_select.c_str())) {
+                    mysql_query(conn, "ROLLBACK");
+                    response_json["success"] = false;
+                    response_json["message"] = "请求失败！";
+                    mysql_close(conn);
+                    res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                    return;
+                }
+
+                MYSQL_RES* result = mysql_store_result(conn);
+                if (result == NULL) {
+                    mysql_query(conn, "ROLLBACK");
+                    response_json["success"] = false;
+                    response_json["message"] = "结果查询失败！";
+                    mysql_close(conn);
+                    res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                    return;
+                }
+
+                MYSQL_ROW row = mysql_fetch_row(result);
+                if (row == NULL) {
+                    mysql_free_result(result);
+                    mysql_query(conn, "ROLLBACK");
+                    mysql_close(conn);
+                    response_json["success"] = false;
+                    response_json["message"] = "没有找到对应的交换记录！";
+                    res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                    return;
+                }
+
+                int db_ufrom = stoi(row[0]);
+                int status = stoi(row[1]);
+
+                mysql_free_result(result);
+
+                if (db_ufrom != request_ufrom) {
+                    mysql_query(conn, "ROLLBACK");
+                    mysql_close(conn);
+                    response_json["success"] = false;
+                    response_json["message"] = "咪只能操作自己收到的交换申请~";
+                    res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                    return;
+                }
+
+                // agree 只能处理 status=0
+                if (action == "agree") {
+                    if (status == 1) {
+                        mysql_query(conn, "ROLLBACK");
+                        mysql_close(conn);
+                        response_json["success"] = false;
+                        response_json["message"] = "咪已经拒绝过这条申请啦~";
+                        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                        return;
+                    }
+                    if (status == 2) {
+                        mysql_query(conn, "ROLLBACK");
+                        mysql_close(conn);
+                        response_json["success"] = false;
+                        response_json["message"] = "咪已经同意申请，等待交换~";
+                        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                        return;
+                    }
+                    if (status == 3) {
+                        mysql_query(conn, "ROLLBACK");
+                        mysql_close(conn);
+                        response_json["success"] = false;
+                        response_json["message"] = "此次交换已经完成啦~";
+                        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                        return;
+                    }
+                    if (status == 4) {
+                        mysql_query(conn, "ROLLBACK");
+                        mysql_close(conn);
+                        response_json["success"] = false;
+                        response_json["message"] = "咪已经取消了这次交换~";
+                        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                        return;
+                    }
+
+                    string sql_update_exchange = "UPDATE exchange SET status = 2 WHERE exchange_id = " + to_string(exchange_id);
+
+                    if (mysql_query(conn, sql_update_exchange.c_str())) {
+                        mysql_query(conn, "ROLLBACK");
+                        response_json["success"] = false;
+                        response_json["message"] = "数据更新失败！";
+                        mysql_close(conn);
+                        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                        return;
+                    }
+
+                    if (mysql_query(conn, "COMMIT")) {
+                        mysql_query(conn, "ROLLBACK");
+                        response_json["success"] = false;
+                        response_json["message"] = "事务提交失败！";
+                        mysql_close(conn);
+                        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                        return;
+                    }
+
+                    mysql_close(conn);
+                    response_json["success"] = true;
+                    response_json["message"] = "咪已经同意交换申请，快去交换吧~";
+                    res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                    return;
+                }
+
+                // reject 只能处理 status=0
+                if (action == "reject") {
+                    if (status == 1) {
+                        mysql_query(conn, "ROLLBACK");
+                        mysql_close(conn);
+                        response_json["success"] = false;
+                        response_json["message"] = "咪已经拒绝过这条申请啦~";
+                        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                        return;
+                    }
+                    if (status == 2) {
+                        mysql_query(conn, "ROLLBACK");
+                        mysql_close(conn);
+                        response_json["success"] = false;
+                        response_json["message"] = "咪已经同意申请，等待交换~";
+                        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                        return;
+                    }
+                    if (status == 3) {
+                        mysql_query(conn, "ROLLBACK");
+                        mysql_close(conn);
+                        response_json["success"] = false;
+                        response_json["message"] = "此次交换已经完成啦~";
+                        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                        return;
+                    }
+                    if (status == 4) {
+                        mysql_query(conn, "ROLLBACK");
+                        mysql_close(conn);
+                        response_json["success"] = false;
+                        response_json["message"] = "咪已经取消了这次交换~";
+                        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                        return;
+                    }
+
+                    string sql_update_exchange = "UPDATE exchange SET status = 1 WHERE exchange_id = " + to_string(exchange_id);
+
+                    if (mysql_query(conn, sql_update_exchange.c_str())) {
+                        mysql_query(conn, "ROLLBACK");
+                        response_json["success"] = false;
+                        response_json["message"] = "数据更新失败！";
+                        mysql_close(conn);
+                        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                        return;
+                    }
+
+                    string sql_de = "SELECT item_id, quantity FROM exdetail WHERE exchange_id = " + exchange_idstr;
+
+                    if (mysql_query(conn, sql_de.c_str())) {
+                        mysql_query(conn, "ROLLBACK");
+                        response_json["success"] = false;
+                        response_json["message"] = "明细查询失败！";
+                        mysql_close(conn);
+                        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                        return;
+                    }
+
+                    MYSQL_RES* result1 = mysql_store_result(conn);
+                    if (result1 == NULL) {
+                        mysql_query(conn, "ROLLBACK");
+                        response_json["success"] = false;
+                        response_json["message"] = "明细结果获取失败！";
+                        mysql_close(conn);
+                        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                        return;
+                    }
+
+                    MYSQL_ROW row1;
+                    while ((row1 = mysql_fetch_row(result1)) != NULL) {
+                        string item_id = row1[0];
+                        string count = row1[1];
+
+                        string sql_op = "UPDATE item SET quantity = quantity + " + count +
+                            " WHERE item_id = " + item_id;
+
+                        if (mysql_query(conn, sql_op.c_str())) {
+                            mysql_free_result(result1);
+                            mysql_query(conn, "ROLLBACK");
+                            response_json["success"] = false;
+                            response_json["message"] = "数量更新失败！";
+                            mysql_close(conn);
+                            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                            return;
+                        }
+                    }
+
+                    mysql_free_result(result1);
+
+                    if (mysql_query(conn, "COMMIT")) {
+                        mysql_query(conn, "ROLLBACK");
+                        response_json["success"] = false;
+                        response_json["message"] = "事务提交失败！";
+                        mysql_close(conn);
+                        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                        return;
+                    }
+
+                    mysql_close(conn);
+                    response_json["success"] = true;
+                    response_json["message"] = "咪已经拒绝该申请~";
+                    res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                    return;
+                }
+
+                // complete 只能处理 status=2
+                if (action == "complete") {
+                    if (status == 0) {
+                        mysql_query(conn, "ROLLBACK");
+                        mysql_close(conn);
+                        response_json["success"] = false;
+                        response_json["message"] = "这条申请还没有处理，不能直接完成哦~";
+                        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                        return;
+                    }
+                    if (status == 1) {
+                        mysql_query(conn, "ROLLBACK");
+                        mysql_close(conn);
+                        response_json["success"] = false;
+                        response_json["message"] = "这条申请已经被拒绝啦~";
+                        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                        return;
+                    }
+                    if (status == 3) {
+                        mysql_query(conn, "ROLLBACK");
+                        mysql_close(conn);
+                        response_json["success"] = false;
+                        response_json["message"] = "此次交换已经完成啦~";
+                        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                        return;
+                    }
+                    if (status == 4) {
+                        mysql_query(conn, "ROLLBACK");
+                        mysql_close(conn);
+                        response_json["success"] = false;
+                        response_json["message"] = "咪已经取消了这次交换~";
+                        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                        return;
+                    }
+
+                    string sql_update_exchange = "UPDATE exchange SET status = 3 WHERE exchange_id = " + to_string(exchange_id);
+
+                    if (mysql_query(conn, sql_update_exchange.c_str())) {
+                        mysql_query(conn, "ROLLBACK");
+                        response_json["success"] = false;
+                        response_json["message"] = "完成状态更新失败！";
+                        mysql_close(conn);
+                        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                        return;
+                    }
+
+                    if (mysql_query(conn, "COMMIT")) {
+                        mysql_query(conn, "ROLLBACK");
+                        response_json["success"] = false;
+                        response_json["message"] = "事务提交失败！";
+                        mysql_close(conn);
+                        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                        return;
+                    }
+
+                    mysql_close(conn);
+                    response_json["success"] = true;
+                    response_json["message"] = "咪已经把这次交换标记为完成啦~";
+                    res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                    return;
+                }
+                });
         // 查看自己发出的申请
         svr.Get("/exchange/outgoing", [](const Request& req, Response& res) {
             set_cors(res);
@@ -1132,6 +1344,104 @@ int main() {
 
         mysql_free_result(result);
         mysql_close(conn);
+        });
+    // 查看待办申请
+    svr.Get("/exchange/todo", [](const Request& req, Response& res) {
+        set_cors(res);
+
+        Json::Value response_json;
+        response_json["data"] = Json::Value(Json::arrayValue);
+
+        string ufromstr = req.get_param_value("ufrom");
+        int ufrom;
+
+        try {
+            ufrom = stoi(ufromstr);
+        }
+        catch (...) {
+            response_json["success"] = false;
+            response_json["message"] = "请输入正确的用户ID哟~";
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        MYSQL* conn = connect_db();
+        if (conn == NULL) {
+            response_json["success"] = false;
+            response_json["message"] = "数据库连接失败";
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        string sql =
+            "SELECT "
+            "e.detail_id, "
+            "e.exchange_id, "
+            "e.item_id, "
+            "i.item_name, "
+            "e.quantity AS apply_quantity, "
+            "i.quantity AS left_quantity, "
+            "a.status, "
+            "a.uto AS applicant_id, "
+            "u.user_name AS applicant_name "
+            "FROM exdetail e "
+            "JOIN item i ON e.item_id = i.item_id "
+            "JOIN exchange a ON e.exchange_id = a.exchange_id "
+            "LEFT JOIN user u ON a.uto = u.user_id "
+            "WHERE i.owner = " + to_string(ufrom) + " "
+            "AND (a.status = 0 OR a.status = 2) "
+            "ORDER BY "
+            "CASE WHEN a.status = 0 THEN 0 ELSE 1 END ASC, "
+            "e.detail_id DESC";
+
+        if (mysql_query(conn, sql.c_str())) {
+            cout << "查询待办申请失败: " << mysql_error(conn) << endl;
+            response_json["success"] = false;
+            response_json["message"] = string("查询失败: ") + mysql_error(conn);
+            mysql_close(conn);
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        MYSQL_RES* result = mysql_store_result(conn);
+        if (result == NULL) {
+            cout << "获取待办申请结果失败: " << mysql_error(conn) << endl;
+            response_json["success"] = false;
+            response_json["message"] = string("获取结果失败: ") + mysql_error(conn);
+            mysql_close(conn);
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        MYSQL_ROW row;
+        while ((row = mysql_fetch_row(result)) != NULL) {
+            Json::Value item;
+
+            item["detail_id"] = row[0] ? stoi(row[0]) : 0;
+            item["exchange_id"] = row[1] ? stoi(row[1]) : 0;
+            item["item_id"] = row[2] ? stoi(row[2]) : 0;
+            item["item_name"] = row[3] ? row[3] : "暂无名称";
+            item["apply_quantity"] = row[4] ? stoi(row[4]) : 0;
+            item["left_quantity"] = row[5] ? stoi(row[5]) : 0;
+            item["status"] = row[6] ? stoi(row[6]) : -1;
+            item["applicant_id"] = row[7] ? stoi(row[7]) : 0;
+            item["applicant_name"] = row[8] ? row[8] : "未知用户";
+
+            response_json["data"].append(item);
+        }
+
+        mysql_free_result(result);
+        mysql_close(conn);
+
+        response_json["success"] = true;
+        if (response_json["data"].size() == 0) {
+            response_json["message"] = "暂时没有待办申请哦~";
+        }
+        else {
+            response_json["message"] = "获取待办申请成功";
+        }
+
+        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
         });
     cout << "Server running at http://127.0.0.1:8080;" << endl;
     svr.listen("127.0.0.1", 8080);
