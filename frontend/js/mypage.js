@@ -54,39 +54,31 @@ function loadMyItems() {
     const user = getCurrentUser();
     const myItemList = document.getElementById("myItemList");
 
-    console.log("当前登录用户：", user);
-
     if (!user || !user.user_id) {
         myItemList.innerHTML = `<p class="empty-text">未获取到登录用户信息，请重新登录</p>`;
         return;
     }
 
     const url = `http://127.0.0.1:8080/items/my?owner=${encodeURIComponent(user.user_id)}`;
-    console.log("请求我的制品地址：", url);
 
     fetch(url)
         .then(response => response.json())
         .then(data => {
-            console.log("我的制品接口返回：", data);
             myItemList.innerHTML = "";
 
             if (!Array.isArray(data)) {
-                myItemList.innerHTML = `
-                    <p class="empty-text">${data.message || "加载失败"}</p>
-                `;
+                myItemList.innerHTML = `<p class="empty-text">${data.message || "加载失败"}</p>`;
                 return;
             }
 
-            const items = data;
-
-            if (items.length === 0) {
+            if (data.length === 0) {
                 myItemList.innerHTML = `
                     <p class="empty-text">咪还没有发布制品~快去和同好分享美味家产叭！</p>
                 `;
                 return;
             }
 
-            items.forEach(item => {
+            data.forEach(item => {
                 const card = document.createElement("div");
                 card.className = "item-card";
 
@@ -102,6 +94,10 @@ function loadMyItems() {
                         <p><span>类型：</span>${item.type || "暂无"}</p>
                         <p><span>剩余数量：</span>${item.quantity ?? 0}</p>
                         <p><span>介绍：</span>${item.intro || "暂无介绍"}</p>
+
+                        <button class="delete-item-btn" onclick="deleteItem(event, ${item.item_id})">
+                            删除制品
+                        </button>
                     </div>
                 `;
 
@@ -115,5 +111,91 @@ function loadMyItems() {
         .catch(error => {
             console.error("加载我的制品失败:", error);
             myItemList.innerHTML = `<p class="empty-text">加载失败，请检查接口返回是否是合法JSON</p>`;
+        });
+}
+
+function openPublishModal() {
+    document.getElementById("publishModal").style.display = "flex";
+}
+
+function closePublishModal() {
+    document.getElementById("publishModal").style.display = "none";
+    document.getElementById("publishForm").reset();
+}
+
+function publishItem() {
+    const user = getCurrentUser();
+
+    if (!user || !user.user_id) {
+        alert("请先登录哦~");
+        return;
+    }
+
+    const itemName = document.getElementById("itemName").value.trim();
+    const role = document.getElementById("role").value.trim();
+    const type = document.getElementById("type").value.trim();
+    const quantity = document.getElementById("quantity").value.trim();
+    const intro = document.getElementById("intro").value.trim();
+
+    const params = new URLSearchParams();
+    params.append("owner", user.user_id);
+    params.append("item_name", itemName);
+    params.append("role", role);
+    params.append("type", type);
+    params.append("quantity", quantity);
+    params.append("intro", intro);
+
+    fetch("http://127.0.0.1:8080/publish", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+        },
+        body: params.toString()
+    })
+        .then(response => response.text())
+        .then(text => {
+            alert(text);
+            closePublishModal();
+            loadMyItems();
+        })
+        .catch(error => {
+            console.error("发布制品失败:", error);
+            alert("发布失败，请检查后端是否启动");
+        });
+}
+
+function deleteItem(event, itemId) {
+    event.stopPropagation();
+
+    const user = getCurrentUser();
+
+    if (!user || !user.user_id) {
+        alert("请先登录哦~");
+        return;
+    }
+
+    if (!confirm("确定要删除这个制品吗？删除后无法恢复哦~")) {
+        return;
+    }
+
+    const params = new URLSearchParams();
+    params.append("item_id", itemId);
+    params.append("owner", user.user_id);
+
+    fetch("http://127.0.0.1:8080/items/delete", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+        },
+        body: params.toString()
+    })
+        .then(response => response.text())
+        .then(text => {
+            alert(text);
+            loadMyItems();
+        })
+        .catch(error => {
+            console.error("删除制品失败:", error);
+            alert("删除失败，请检查后端是否启动");
         });
 }

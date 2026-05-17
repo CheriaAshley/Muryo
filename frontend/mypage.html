@@ -35,8 +35,12 @@
 
         <section class="content">
             <div class="content-header">
-                <h1>我的主页</h1>
-                <p>查看个人信息和我发布的制品</p>
+                <div>
+                    <h1>我的主页</h1>
+                    <p>查看个人信息和我发布的制品</p>
+                </div>
+
+                <button class="publish-btn" onclick="openPublishModal()">发布制品</button>
             </div>
 
             <div class="profile-card" id="profileCard">
@@ -52,6 +56,35 @@
             </div>
         </section>
 
+    </div>
+</div>
+
+<!-- 发布制品弹窗 -->
+<div class="modal-mask" id="publishModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2>发布制品</h2>
+            <span class="close-btn" onclick="closePublishModal()">×</span>
+        </div>
+
+        <form id="publishForm" onsubmit="publishItem(); return false;">
+            <label>制品名称</label>
+            <input type="text" id="itemName" required>
+
+            <label>角色</label>
+            <input type="text" id="role" placeholder="例如：阿米娅、白起、汤汤">
+
+            <label>类型</label>
+            <input type="text" id="type" placeholder="例如：吧唧、色纸、立牌">
+
+            <label>数量</label>
+            <input type="number" id="quantity" min="1" required>
+
+            <label>介绍</label>
+            <textarea id="intro" rows="4" placeholder="简单介绍一下这个制品吧~"></textarea>
+
+            <button type="submit" class="submit-btn">确认发布</button>
+        </form>
     </div>
 </div>
 
