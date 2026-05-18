@@ -74,9 +74,9 @@ CREATE TABLE admin_apply (
 CREATE TABLE item (
   item_id INT NOT NULL AUTO_INCREMENT,
   owner INT NOT NULL DEFAULT 1,-- 需要建立一个id为1的默认用户，作为系统默认制品的拥有者
-  item_name VARCHAR(50) DEFAULT '默认名称',
-  role VARCHAR(50) DEFAULT '默认角色',
-  type VARCHAR(50) DEFAULT '默认类型',
+  item_name VARCHAR(50) NOT NULL DEFAULT '默认名称',
+  role VARCHAR(50) NOT NULL DEFAULT '默认角色',
+  type VARCHAR(50) NOT NULL DEFAULT '默认类型',
   quantity INT DEFAULT 0,
   status INT DEFAULT 0,
   create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
