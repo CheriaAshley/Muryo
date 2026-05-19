@@ -1635,7 +1635,7 @@ int main() {
         }
 
         string sql =
-            "SELECT user_id, user_name, contact, introduction "
+            "SELECT user_id, user_name, contact, intro "
             "FROM `user` "
             "WHERE user_id = " + to_string(user_id);
 
@@ -1680,7 +1680,7 @@ int main() {
         response_json["data"]["user_id"] = row[0] ? atoi(row[0]) : 0;
         response_json["data"]["user_name"] = row[1] ? row[1] : "";
         response_json["data"]["contact"] = row[2] ? row[2] : "";
-        response_json["data"]["introduction"] = row[3] ? row[3] : "";
+        response_json["data"]["intro"] = row[3] ? row[3] : "";
 
         mysql_free_result(result);
         mysql_close(conn);
