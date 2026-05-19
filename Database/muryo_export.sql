@@ -9,6 +9,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- 删除旧对象
 -- 删除视图
 DROP VIEW IF EXISTS view_exchange_detail;
+DROP VIEW IF EXISTS view_item_detail;
 -- 删除触发器
 DROP TRIGGER IF EXISTS trg_exchange_after_update;
 DROP TRIGGER IF EXISTS trg_exdetail_before_insert;
@@ -297,7 +298,8 @@ SELECT
     d.detail_id,
     d.item_id,
     i.item_name,
-    d.quantity,
+    d.quantity AS apply_quantity,
+    i.quantity AS left_quantity,
     e.status,
     CASE
         WHEN e.status = 0 THEN '待处理'
@@ -312,3 +314,18 @@ JOIN exdetail d ON e.exchange_id = d.exchange_id
 JOIN item i ON d.item_id = i.item_id
 JOIN user u_apply ON e.uto = u_apply.user_id
 JOIN user u_target ON e.ufrom = u_target.user_id;
+
+CREATE VIEW view_item_detail AS
+SELECT
+    i.item_id,
+    i.owner,
+    IFNULL(NULLIF(u.user_name, ''), '未知用户') AS owner_name,
+    IFNULL(NULLIF(i.item_name, ''), '默认名称') AS item_name,
+    IFNULL(NULLIF(i.role, ''), '默认角色') AS role,
+    IFNULL(NULLIF(i.type, ''), '默认类型') AS type,
+    i.quantity,
+    i.status,
+    IFNULL(NULLIF(i.img_url, ''), '') AS img_url,
+    IFNULL(NULLIF(i.intro, ''), '暂无介绍') AS intro
+FROM item i
+LEFT JOIN `user` u ON i.owner = u.user_id;
