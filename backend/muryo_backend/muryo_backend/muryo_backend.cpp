@@ -211,11 +211,10 @@ int main() {
         int result = mysql_query(conn, sql.c_str());
 
         if (result != 0) {
-            string err = mysql_error(conn);
             mysql_close(conn);
 
             response_json["success"] = false;
-            response_json["message"] = "注册失败: " + err;
+            response_json["message"] = "注册失败，用户名重复~ " ;
 
             res.set_content(
                 response_json.toStyledString(),
@@ -394,7 +393,7 @@ int main() {
             return;
         }
 
-        if (quantity_num <= 0) {
+        if (quantity_num < 0) {
             response_json["success"] = false;
             response_json["message"] = "咪，数量必须大于0哦~";
 
@@ -645,9 +644,11 @@ int main() {
                 + to_string(item_id_list[i]);
 
             if (mysql_query(conn, check_sql.c_str())) {
+                string err = mysql_error(conn);
                 mysql_query(conn, "ROLLBACK");
+                
                 response_json["success"] = false;
-                response_json["message"] = string("查询制品失败: ") + mysql_error(conn);
+                response_json["message"] = string("查询制品失败: ") + err;
                 mysql_close(conn);
                 
                 res.set_content(
@@ -745,14 +746,15 @@ int main() {
             sql_detail += to_string(quantity_list[i]) + ")";
 
             if (mysql_query(conn, sql_detail.c_str())) {
+                string err = mysql_error(conn);
                 mysql_query(conn, "ROLLBACK");
                 response_json["success"] = false;
-                response_json["message"] = string("申请失败: ") + mysql_error(conn);
+                response_json["message"] = string("申请失败: ") + err;
                 mysql_close(conn);
                 
                 res.set_content(
-                response_json.toStyledString(), 
-                "application/json;charset=UTF-8"
+                    response_json.toStyledString(), 
+                    "application/json;charset=UTF-8"
                 );
                 return;
             }
