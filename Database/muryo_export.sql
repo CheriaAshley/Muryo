@@ -44,12 +44,15 @@ VALUES (1, 'system', '123456');
 -- 管理员表是用户的子实体
 CREATE TABLE admin (
   user_id INT NOT NULL,
-  level INT DEFAULT 1,
+  level INT NOT NULL DEFAULT 1,
   PRIMARY KEY (user_id),
   CONSTRAINT fk_admin_user
   FOREIGN KEY (user_id) REFERENCES user(user_id)
   ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO admin(user_id,level)
+VALUES (1,3);
 
 -- 管理员操作申请表
 CREATE TABLE admin_apply (
