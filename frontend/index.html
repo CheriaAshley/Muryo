@@ -15,8 +15,9 @@
         <div class="logo">Muryo ~</div>
 
         <div class="search-box">
-            <input type="text" id="searchInput" placeholder="搜索制品或厨子">
+            <input type="text" id="searchInput" placeholder="搜索制品或厨子" onkeydown="handleSearchEnter(event)">
             <button onclick="searchItems()">搜索</button>
+            <button onclick="resetSearch()">查看全部</button>
         </div>
 
         <div class="user-actions">
@@ -41,11 +42,12 @@
         <section class="content">
             <div class="content-header">
                 <h1>制品广场</h1>
-                <p>这里展示当前可以交换的制品</p>
+                <p>这里显示所有符合要求的制品，快去交换吧！</p>
+                <p id="itemCountText" class="item-count-text">正在统计制品数量...</p>
             </div>
 
             <div class="item-list" id="itemList">
-   
+                <p class="loading-text">正在加载制品...</p>
             </div>
         </section>
 

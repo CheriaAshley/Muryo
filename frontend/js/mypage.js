@@ -1,28 +1,10 @@
 window.onload = function () {
     if (!checkLogin()) return;
 
-    updateLoginButtons();
+    updateLoginState();
     loadProfile();
     loadMyItems();
 };
-
-function updateLoginButtons() {
-    const user = getCurrentUser();
-
-    const loginBtn = document.getElementById("loginBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const welcomeText = document.getElementById("welcomeText");
-
-    if (user.user_id && user.user_name) {
-        if (loginBtn) loginBtn.style.display = "none";
-        if (logoutBtn) logoutBtn.style.display = "inline-block";
-        if (welcomeText) welcomeText.innerText = "欢迎你，" + user.user_name;
-    } else {
-        if (loginBtn) loginBtn.style.display = "inline-block";
-        if (logoutBtn) logoutBtn.style.display = "none";
-        if (welcomeText) welcomeText.innerText = "";
-    }
-}
 
 function loadProfile() {
     const user = getCurrentUser();
@@ -35,6 +17,8 @@ function loadProfile() {
                 profileCard.innerHTML = `<h2>个人信息</h2><p>${data.message || "加载失败"}</p>`;
                 return;
             }
+
+            const profile = data.data;
 
             profileCard.innerHTML = `
                 <h2>个人信息</h2>
@@ -53,46 +37,53 @@ function loadProfile() {
 function loadMyItems() {
     const user = getCurrentUser();
     const myItemList = document.getElementById("myItemList");
+    const myItemCountText = document.getElementById("myItemCountText");
 
-    if (!user || !user.user_id) {
-        myItemList.innerHTML = `<p class="empty-text">未获取到登录用户信息，请重新登录</p>`;
-        return;
+    myItemList.innerHTML = `<p class="loading-text">正在加载我的制品...</p>`;
+
+    if (myItemCountText) {
+        myItemCountText.innerText = "正在统计...";
     }
 
-    const url = `http://127.0.0.1:8080/items/my?owner=${encodeURIComponent(user.user_id)}`;
-
-    fetch(url)
+    fetch(`http://127.0.0.1:8080/items/my?owner=${encodeURIComponent(user.user_id)}`)
         .then(response => response.json())
         .then(data => {
             myItemList.innerHTML = "";
 
-            if (!Array.isArray(data)) {
+            if (!data.success) {
                 myItemList.innerHTML = `<p class="empty-text">${data.message || "加载失败"}</p>`;
+                if (myItemCountText) myItemCountText.innerText = "共 0 个制品";
                 return;
             }
 
-            if (data.length === 0) {
-                myItemList.innerHTML = `
-                    <p class="empty-text">咪还没有发布制品~快去和同好分享美味家产叭！</p>
-                `;
+            const items = Array.isArray(data.data) ? data.data : [];
+
+            if (myItemCountText) {
+                myItemCountText.innerText = "共 " + items.length + " 个制品";
+            }
+
+            if (items.length === 0) {
+                myItemList.innerHTML = `<p class="empty-text">${data.message || "咪还没有发布制品哦~"}</p>`;
                 return;
             }
 
-            data.forEach(item => {
+
+            items.forEach(item => {
                 const card = document.createElement("div");
                 card.className = "item-card";
 
-                const imageHtml = item.image_url
-                    ? `<img src="${item.image_url}" alt="${item.item_name}" class="item-image">`
-                    : `<div class="item-image placeholder">暂无图片</div>`;
-
+                const img_url = item.img_url && item.img_url.trim() !== ""
+                    ? item.img_url
+                    : "upload/default_item.png";
+                    
                 card.innerHTML = `
-                    ${imageHtml}
+                    <img src="${img_url}" alt="${item.item_name || "制品图片"}" class="item-img_url">
+
                     <div class="item-info">
                         <h3>${item.item_name || "默认名称"}</h3>
                         <p><span>角色：</span>${item.role || "暂无"}</p>
                         <p><span>类型：</span>${item.type || "暂无"}</p>
-                        <p><span>剩余数量：</span>${item.quantity ?? 0}</p>
+                        <p><span>剩余数量：</span>${item.quantity || 0}</p>
                         <p><span>介绍：</span>${item.intro || "暂无介绍"}</p>
 
                         <button class="delete-item-btn" onclick="deleteItem(event, ${item.item_id})">
@@ -110,7 +101,8 @@ function loadMyItems() {
         })
         .catch(error => {
             console.error("加载我的制品失败:", error);
-            myItemList.innerHTML = `<p class="empty-text">加载失败，请检查接口返回是否是合法JSON</p>`;
+             myItemList.innerHTML = `<p class="empty-text">服务器连接失败，请检查后端是否启动哦~</p>`;
+            if (myItemCountText) myItemCountText.innerText = "共 0 个制品";
         });
 }
 
@@ -135,7 +127,29 @@ function publishItem() {
     const role = document.getElementById("role").value.trim();
     const type = document.getElementById("type").value.trim();
     const quantity = document.getElementById("quantity").value.trim();
+    const img_url = document.getElementById("img_url").value.trim();
     const intro = document.getElementById("intro").value.trim();
+    const publishBtn = document.getElementById("publishBtn");
+
+    if (!itemName || !role || !type) {
+        alert("咪，制品名称、角色和类型不能为空~");
+        return;
+    }
+
+    if (!quantity) {
+        alert("咪，数量必须大于0哦~");
+        return;
+    }
+
+    if (Number(quantity) <= 0) {
+        alert("咪，数量必须大于0哦~");
+        return;
+    }
+
+    if (publishBtn) {
+        publishBtn.disabled = true;
+        publishBtn.innerText = "发布中...";
+    }
 
     const params = new URLSearchParams();
     params.append("owner", user.user_id);
@@ -143,25 +157,36 @@ function publishItem() {
     params.append("role", role);
     params.append("type", type);
     params.append("quantity", quantity);
+    params.append("img_url", img_url);
     params.append("intro", intro);
 
-    fetch("http://127.0.0.1:8080/publish", {
+
+    fetch("http://127.0.0.1:8080/items/publish", {
         method: "POST",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
         },
         body: params.toString()
     })
-        .then(response => response.text())
-        .then(text => {
-            alert(text);
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message || "发布完成");
+
+        if (data.success) {
             closePublishModal();
             loadMyItems();
-        })
-        .catch(error => {
-            console.error("发布制品失败:", error);
-            alert("发布失败，请检查后端是否启动");
-        });
+        }
+    })
+    .catch(error => {
+        console.error("发布制品失败:", error);
+        alert("服务器连接失败，请检查后端是否启动哦~");
+    })
+    .finally(() => {
+        if (publishBtn) {
+            publishBtn.disabled = false;
+            publishBtn.innerText = "确认发布";
+        }
+    });
 }
 
 function deleteItem(event, itemId) {
@@ -189,13 +214,16 @@ function deleteItem(event, itemId) {
         },
         body: params.toString()
     })
-        .then(response => response.text())
-        .then(text => {
-            alert(text);
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message || "操作完成");
+
+        if (data.success) {
             loadMyItems();
-        })
-        .catch(error => {
-            console.error("删除制品失败:", error);
-            alert("删除失败，请检查后端是否启动");
-        });
+        }
+    })
+    .catch(error => {
+        console.error("删除制品失败:", error);
+        alert("服务器连接失败，请检查后端是否启动哦~");
+    });
 }

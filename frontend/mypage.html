@@ -12,7 +12,7 @@
 <div class="page">
 
     <header class="topbar">
-        <div class="logo" onclick="goHome()">Muryo ~</div>
+        <div class="logo">Muryo ~</div>
 
         <div class="user-actions">
             <span id="welcomeText"></span>
@@ -45,13 +45,18 @@
 
             <div class="profile-card" id="profileCard">
                 <h2>个人信息</h2>
-                <p>加载中...</p>
+                <p class="loading-text">加载中...</p>
             </div>
 
             <div class="my-items-section">
                 <h2>我的制品</h2>
+                <div class="section-title-row">
+                    <h2>我的制品</h2>
+                    <span id="myItemCountText">正在统计...</span>
+                </div>
+
                 <div class="item-list" id="myItemList">
-                    <p>正在加载我的制品...</p>
+                    <p class="loading-text">正在加载我的制品...</p>
                 </div>
             </div>
         </section>
@@ -72,7 +77,7 @@
             <input type="text" id="itemName" required>
 
             <label>角色</label>
-            <input type="text" id="role" placeholder="例如：阿米娅、白起、汤汤">
+            <input type="text" id="role" placeholder="例如：阿米娅、初音未来、汤汤">
 
             <label>类型</label>
             <input type="text" id="type" placeholder="例如：吧唧、色纸、立牌">
@@ -80,10 +85,13 @@
             <label>数量</label>
             <input type="number" id="quantity" min="1" required>
 
+            <label>制品图片地址</label>
+            <input type="text" id="img_url" placeholder="可以先不填，默认使用占位图">
+
             <label>介绍</label>
             <textarea id="intro" rows="4" placeholder="简单介绍一下这个制品吧~"></textarea>
 
-            <button type="submit" class="submit-btn">确认发布</button>
+             <button type="submit" class="submit-btn" id="publishBtn">确认发布</button>
         </form>
     </div>
 </div>

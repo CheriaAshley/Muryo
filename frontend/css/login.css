@@ -1,58 +1,146 @@
-body {
+* {
     margin: 0;
     padding: 0;
-    font-family: 'Fredoka', sans-serif;
-    background: #f7edc5;
+    box-sizing: border-box;
 }
 
+body {
+    font-family: 'Nunito', 'Microsoft YaHei', sans-serif;
+    background: linear-gradient(135deg, #f7edc5, #f1ddb0);
+    min-height: 100vh;
+    color: #5a4a3c;
+}
+
+/* 页面整体居中 */
 .container {
     width: 100%;
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 20px;
 }
 
+/* 登录卡片 */
 .formbox {
-    background: white;
-    width: 420px;
-    padding: 30px;
-    min-height: 300px;
-    border-radius: 20px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    width: 430px;
+    background: rgba(255, 250, 240, 0.96);
+    border-radius: 28px;
+    padding: 42px 38px;
+    box-shadow: 0 10px 30px rgba(120, 92, 36, 0.14);
+    border: 1px solid rgba(214, 190, 120, 0.35);
     text-align: center;
 }
+
+/* 标题 */
 .title {
-    margin-bottom: 20px;
-    font-size: 22px;
-}
-input {
-    display: block;
-    width: 250px;
-    margin: 10px auto;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    font-size: 32px;
+    font-weight: 700;
+    color: #7d5b22;
+    margin-bottom: 10px;
 }
 
+.subtitle {
+    font-size: 15px;
+    color: #8f7852;
+    margin-bottom: 30px;
+}
+
+/* 输入框 */
+input {
+    width: 100%;
+    height: 50px;
+    margin-bottom: 18px;
+    padding: 0 16px;
+    border: 1px solid #dcc68a;
+    border-radius: 15px;
+    background-color: #fffaf0;
+    font-size: 15px;
+    outline: none;
+    transition: 0.2s;
+    color: #5a4a3c;
+}
+
+input:focus {
+    border-color: #caa04a;
+    box-shadow: 0 0 0 4px rgba(202, 160, 74, 0.15);
+}
+
+/* 输入框提示文字 */
+input::placeholder {
+    color: #b19a6c;
+}
+
+/* 登录按钮 */
 button {
-    width: 270px;
-    padding: 10px;
-    background: #3498db;
-    color: white;
+    width: 100%;
+    height: 50px;
+    margin-top: 8px;
     border: none;
-    border-radius: 5px;
+    border-radius: 15px;
+    background: #d4aa4f;
+    color: #fffdf6;
+    font-size: 16px;
+    font-weight: 700;
     cursor: pointer;
+    transition: 0.25s;
 }
 
 button:hover {
-    background: #2980b9;
+    background: #bc9138;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(188, 145, 56, 0.25);
 }
 
-a {
-    color: #3498db;
-    text-decoration: none;
+/* 底部文字 */
+.bottom-text {
+    margin-top: 24px;
+    font-size: 14px;
+    color: #866f48;
 }
-a:hover{
-    color: #2980b9;
+
+/* 超链接 */
+a {
+    color: #b7892f;
+    text-decoration: none;
+    font-weight: 700;
+    transition: 0.2s;
+}
+
+a:hover {
+    color: #8f6820;
+}
+
+/* logo文字 */
+.logo-text {
+    font-size: 42px;
+    font-weight: 700;
+    color: #d4aa4f;
+    margin-bottom: 8px;
+}
+
+/* 小装饰 */
+.form-decoration {
+    width: 70px;
+    height: 6px;
+    border-radius: 999px;
+    background: #e3c878;
+    margin: 0 auto 28px auto;
+}
+
+/* 手机适配 */
+@media (max-width: 520px) {
+    .formbox {
+        width: 100%;
+        padding: 36px 24px;
+        border-radius: 22px;
+    }
+
+    .title {
+        font-size: 28px;
+    }
+
+    .logo-text {
+        font-size: 36px;
+    }
 }

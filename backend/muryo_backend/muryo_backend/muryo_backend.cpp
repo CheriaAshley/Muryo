@@ -1082,7 +1082,7 @@ int main() {
         }
 
         string sql =
-            "SELECT * "
+            "SELECT item_id, owner, owner_name, item_name, role, type, quantity, status, img_url, intro "
             "FROM view_item_detail "
             "WHERE status = 0 AND quantity > 0 "
             "ORDER BY item_id DESC";
@@ -1208,7 +1208,7 @@ int main() {
         string sql =
         "SELECT * "
         "FROM view_item_detail "
-        "WHERE status <> 2 AND owner = " + to_string(owner) + " "
+        "WHERE status = 0 AND owner = " + to_string(owner) + " "
         "ORDER BY item_id DESC";
 
         if (mysql_query(conn, sql.c_str())) {
@@ -1919,12 +1919,490 @@ int main() {
         mysql_close(conn);
 
         response_json["success"] = true;
-        response_json["message"] =response_json["data"].size() == 0 ?"暂时没有收到交换申请" :"视图查询成功";
+        response_json["data"] = data;
+        response_json["message"] = data.size() == 0 ? "暂时没有收到交换申请" : "视图查询成功";
 
         res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
     });
 
-   
+    /*突发奇想，做个收藏功能吧*/
+    
+    // 添加收藏
+    svr.Post("/favorite/add", [](const Request& req, Response& res) {
+        set_cors(res);
+
+        Value response_json;
+
+        string user_idstr = req.get_param_value("user_id");
+        string item_idstr = req.get_param_value("item_id");
+
+        if (user_idstr.empty() || item_idstr.empty()) {
+            response_json["success"] = false;
+            response_json["message"] = "缺少用户编号或制品编号";
+
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        int user_id;
+        int item_id;
+
+        try {
+            user_id = stoi(user_idstr);
+            item_id = stoi(item_idstr);
+        }
+        catch (...) {
+            response_json["success"] = false;
+            response_json["message"] = "用户编号或制品编号格式错误";
+
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        if (user_id <= 0 || item_id <= 0) {
+            response_json["success"] = false;
+            response_json["message"] = "用户编号或制品编号不合法";
+
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        MYSQL* conn = connect_db();
+
+        if (conn == NULL) {
+            response_json["success"] = false;
+            response_json["message"] = "数据库连接失败";
+
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        string check_sql =
+            "SELECT item_id FROM item WHERE item_id = " + to_string(item_id) + " "
+            "AND status = 0";
+
+        if (mysql_query(conn, check_sql.c_str())) {
+            response_json["success"] = false;
+            response_json["message"] = string("查询制品失败: ") + mysql_error(conn);
+
+            mysql_close(conn);
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        MYSQL_RES* result = mysql_store_result(conn);
+        MYSQL_ROW row = mysql_fetch_row(result);
+
+        if (row == NULL) {
+            mysql_free_result(result);
+            mysql_close(conn);
+
+            response_json["success"] = false;
+            response_json["message"] = "该制品不存在或当前不可收藏";
+
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        mysql_free_result(result);
+
+        string sql =
+            "INSERT INTO favorite(user_id, item_id) VALUES("
+            + to_string(user_id) + ", "
+            + to_string(item_id) + ")";
+
+        if (mysql_query(conn, sql.c_str())) {
+            string err = mysql_error(conn);
+
+            mysql_close(conn);
+
+            response_json["success"] = false;
+
+            if (err.find("Duplicate") != string::npos) {
+                response_json["message"] = "你已经收藏过这个制品啦~";
+            }
+            else {
+                response_json["message"] = "收藏失败: " + err;
+            }
+
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        mysql_close(conn);
+
+        response_json["success"] = true;
+        response_json["message"] = "收藏成功~";
+
+        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+    });
+
+    // 取消收藏
+    svr.Post("/favorite/remove", [](const Request& req, Response& res) {
+        set_cors(res);
+
+        Value response_json;
+
+        string user_idstr = req.get_param_value("user_id");
+        string item_idstr = req.get_param_value("item_id");
+
+        if (user_idstr.empty() || item_idstr.empty()) {
+            response_json["success"] = false;
+            response_json["message"] = "缺少用户编号或制品编号";
+
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        int user_id;
+        int item_id;
+
+        try {
+            user_id = stoi(user_idstr);
+            item_id = stoi(item_idstr);
+        }
+        catch (...) {
+            response_json["success"] = false;
+            response_json["message"] = "用户编号或制品编号格式错误";
+
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        MYSQL* conn = connect_db();
+
+        if (conn == NULL) {
+            response_json["success"] = false;
+            response_json["message"] = "数据库连接失败";
+
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        string sql =
+            "DELETE FROM favorite "
+            "WHERE user_id = " + to_string(user_id) + " "
+            "AND item_id = " + to_string(item_id);
+
+        if (mysql_query(conn, sql.c_str())) {
+            response_json["success"] = false;
+            response_json["message"] = string("取消收藏失败: ") + mysql_error(conn);
+
+            mysql_close(conn);
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        if (mysql_affected_rows(conn) == 0) {
+            mysql_close(conn);
+
+            response_json["success"] = false;
+            response_json["message"] = "你还没有收藏这个制品";
+
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        mysql_close(conn);
+
+        response_json["success"] = true;
+        response_json["message"] = "已取消收藏";
+
+        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+    });
+
+    // 查看我的收藏
+    svr.Get("/favorite/list", [](const Request& req, Response& res) {
+        set_cors(res);
+
+        Value response_json;
+        Value data(arrayValue);
+
+        string user_idstr = req.get_param_value("user_id");
+
+        if (user_idstr.empty()) {
+            response_json["success"] = false;
+            response_json["message"] = "请先登录后再查看收藏";
+            response_json["data"] = data;
+
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        int user_id;
+
+        try {
+            user_id = stoi(user_idstr);
+        }
+        catch (...) {
+            response_json["success"] = false;
+            response_json["message"] = "用户编号格式错误";
+            response_json["data"] = data;
+
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        MYSQL* conn = connect_db();
+
+        if (conn == NULL) {
+            response_json["success"] = false;
+            response_json["message"] = "数据库连接失败";
+            response_json["data"] = data;
+
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        string sql =
+            "SELECT "
+            "v.item_id, v.owner, v.owner_name, v.item_name, v.role, v.type, "
+            "v.quantity, v.status, v.img_url, v.intro, f.create_at "
+            "FROM favorite f "
+            "JOIN view_item_detail v ON f.item_id = v.item_id "
+            "WHERE f.user_id = " + to_string(user_id) + " "
+            "AND v.status = 0 "
+            "ORDER BY f.favorite_id DESC";
+
+        if (mysql_query(conn, sql.c_str())) {
+            response_json["success"] = false;
+            response_json["message"] = string("查询收藏失败: ") + mysql_error(conn);
+            response_json["data"] = data;
+
+            mysql_close(conn);
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        MYSQL_RES* result = mysql_store_result(conn);
+
+        if (result == NULL) {
+            response_json["success"] = false;
+            response_json["message"] = string("获取收藏结果失败: ") + mysql_error(conn);
+            response_json["data"] = data;
+
+            mysql_close(conn);
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        MYSQL_ROW row;
+
+        while ((row = mysql_fetch_row(result)) != NULL) {
+            Value item;
+
+            item["item_id"] = row[0] ? atoi(row[0]) : 0;
+            item["owner"] = row[1] ? atoi(row[1]) : 0;
+            item["owner_name"] = row[2] ? row[2] : "";
+            item["item_name"] = row[3] ? row[3] : "";
+            item["role"] = row[4] ? row[4] : "";
+            item["type"] = row[5] ? row[5] : "";
+            item["quantity"] = row[6] ? atoi(row[6]) : 0;
+            item["status"] = row[7] ? atoi(row[7]) : 0;
+            item["img_url"] = row[8] ? row[8] : "";
+            item["intro"] = row[9] ? row[9] : "";
+            item["favorite_time"] = row[10] ? row[10] : "";
+
+            data.append(item);
+        }
+
+        mysql_free_result(result);
+        mysql_close(conn);
+
+        response_json["success"] = true;
+        response_json["message"] = data.size() == 0 ? "你还没有收藏任何制品哦~" : "查询成功";
+        response_json["data"] = data;
+
+        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+    });
+
+    // 判断是否已收藏
+    svr.Get("/favorite/check", [](const Request& req, Response& res) {
+        set_cors(res);
+
+        Value response_json;
+
+        string user_idstr = req.get_param_value("user_id");
+        string item_idstr = req.get_param_value("item_id");
+
+        if (user_idstr.empty() || item_idstr.empty()) {
+            response_json["success"] = false;
+            response_json["message"] = "缺少用户编号或制品编号";
+            response_json["is_favorite"] = false;
+
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        int user_id;
+        int item_id;
+
+        try {
+            user_id = stoi(user_idstr);
+            item_id = stoi(item_idstr);
+        }
+        catch (...) {
+            response_json["success"] = false;
+            response_json["message"] = "参数格式错误";
+            response_json["is_favorite"] = false;
+
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        MYSQL* conn = connect_db();
+
+        if (conn == NULL) {
+            response_json["success"] = false;
+            response_json["message"] = "数据库连接失败";
+            response_json["is_favorite"] = false;
+
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        string sql =
+            "SELECT favorite_id FROM favorite "
+            "WHERE user_id = " + to_string(user_id) + " "
+            "AND item_id = " + to_string(item_id) + " "
+            "LIMIT 1";
+
+        if (mysql_query(conn, sql.c_str())) {
+            response_json["success"] = false;
+            response_json["message"] = string("查询失败: ") + mysql_error(conn);
+            response_json["is_favorite"] = false;
+
+            mysql_close(conn);
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        MYSQL_RES* result = mysql_store_result(conn);
+        MYSQL_ROW row = mysql_fetch_row(result);
+
+        bool is_favorite = (row != NULL);
+
+        mysql_free_result(result);
+        mysql_close(conn);
+
+        response_json["success"] = true;
+        response_json["message"] = "查询成功";
+        response_json["is_favorite"] = is_favorite;
+
+        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+    });
+
+    // 查看某个作者的所有可交换制品
+    svr.Get("/items/by-owner", [](const Request& req, Response& res) {
+        set_cors(res);
+
+        Value response_json;
+        Value data(arrayValue);
+
+        string ownerstr = req.get_param_value("owner");
+
+        if (ownerstr.empty()) {
+            response_json["success"] = false;
+            response_json["message"] = "缺少作者编号";
+            response_json["data"] = data;
+
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        int owner;
+
+        try {
+            owner = stoi(ownerstr);
+        }
+        catch (...) {
+            response_json["success"] = false;
+            response_json["message"] = "作者编号格式错误";
+            response_json["data"] = data;
+
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        if (owner <= 0) {
+            response_json["success"] = false;
+            response_json["message"] = "作者编号不合法";
+            response_json["data"] = data;
+
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        MYSQL* conn = connect_db();
+
+        if (conn == NULL) {
+            response_json["success"] = false;
+            response_json["message"] = "数据库连接失败";
+            response_json["data"] = data;
+
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        string sql =
+            "SELECT * "
+            "FROM view_item_detail "
+            "WHERE owner = " + to_string(owner) + " "
+            "AND status = 0 "
+            "AND quantity > 0 "
+            "ORDER BY item_id DESC";
+
+        if (mysql_query(conn, sql.c_str())) {
+            response_json["success"] = false;
+            response_json["message"] = string("查询失败: ") + mysql_error(conn);
+            response_json["data"] = data;
+
+            mysql_close(conn);
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        MYSQL_RES* result = mysql_store_result(conn);
+
+        if (result == NULL) {
+            response_json["success"] = false;
+            response_json["message"] = string("获取结果失败: ") + mysql_error(conn);
+            response_json["data"] = data;
+
+            mysql_close(conn);
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        MYSQL_ROW row;
+
+        while ((row = mysql_fetch_row(result)) != NULL) {
+            Value item;
+
+            item["item_id"] = row[0] ? atoi(row[0]) : 0;
+            item["owner"] = row[1] ? atoi(row[1]) : 0;
+            item["owner_name"] = row[2] ? row[2] : "";
+            item["item_name"] = row[3] ? row[3] : "";
+            item["role"] = row[4] ? row[4] : "";
+            item["type"] = row[5] ? row[5] : "";
+            item["quantity"] = row[6] ? atoi(row[6]) : 0;
+            item["status"] = row[7] ? atoi(row[7]) : 0;
+            item["img_url"] = row[8] ? row[8] : "";
+            item["intro"] = row[9] ? row[9] : "";
+
+            data.append(item);
+        }
+
+        mysql_free_result(result);
+        mysql_close(conn);
+
+        response_json["success"] = true;
+        response_json["message"] = data.size() == 0 ? "该作者暂无可交换制品" : "查询成功";
+        response_json["data"] = data;
+
+        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+    });
+
     /*
         下面是管理员相关部分
         由于是2.0版本的新功能，且原项目只打算做1.0版本
@@ -2332,7 +2810,7 @@ int main() {
             sql =
                 "SELECT apply_id, admin_id, apply_type, target_id, reason, status, create_time "
                 "FROM admin_apply "
-                "WHERE status = 0 AND apply_type = 'delete_item' "
+                "WHERE status = 0 AND apply_type = 'ban_item' "
                 "ORDER BY apply_id DESC";
         }
         else if (level == 3) {
@@ -2542,12 +3020,12 @@ int main() {
             return;
         }
 
-        if (apply_type == "delete_item" && level < 2) {
+        if (apply_type == "ban_item" && level < 2) {
             mysql_query(conn, "ROLLBACK");
             mysql_close(conn);
 
             response_json["success"] = false;
-            response_json["message"] = "只有二级及以上管理员可以审核删除申请";
+            response_json["message"] = "只有二级及以上管理员可以审核封禁申请";
 
             res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
             return;
@@ -2564,7 +3042,7 @@ int main() {
             return;
         }
 
-        if (apply_type != "delete_item" && apply_type != "ban_user") {
+        if (apply_type != "ban_item" && apply_type != "ban_user") {
             mysql_query(conn, "ROLLBACK");
             mysql_close(conn);
 
@@ -2576,7 +3054,7 @@ int main() {
         }
 
         if (action == "agree") {
-            if (apply_type == "delete_item") {
+            if (apply_type == "ban_item") {
                 sql =
                     "UPDATE item "
                     "SET status = 2 "
@@ -3196,6 +3674,105 @@ int main() {
 
         response_json["success"] = true;
         response_json["message"] = "用户已成为管理员";
+
+        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+    });
+
+    // 查看当前用户是否是管理员
+    svr.Get("/admin/me", [](const Request& req, Response& res) {
+        set_cors(res);
+
+        Value response_json;
+
+        string user_idstr = req.get_param_value("user_id");
+
+        response_json["is_admin"] = false;
+        response_json["level"] = 0;
+
+        if (user_idstr.empty()) {
+            response_json["success"] = false;
+            response_json["message"] = "请先登录后再查看管理员身份";
+
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        int user_id;
+
+        try {
+            user_id = stoi(user_idstr);
+        }
+        catch (...) {
+            response_json["success"] = false;
+            response_json["message"] = "用户编号格式错误";
+
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        if (user_id <= 0) {
+            response_json["success"] = false;
+            response_json["message"] = "用户编号不合法";
+
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        MYSQL* conn = connect_db();
+
+        if (conn == NULL) {
+            response_json["success"] = false;
+            response_json["message"] = "数据库连接失败";
+
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        string sql =
+            "SELECT level "
+            "FROM admin "
+            "WHERE user_id = " + to_string(user_id) + " "
+            "LIMIT 1";
+
+        if (mysql_query(conn, sql.c_str())) {
+            response_json["success"] = false;
+            response_json["message"] = string("查询管理员身份失败: ") + mysql_error(conn);
+
+            mysql_close(conn);
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        MYSQL_RES* result = mysql_store_result(conn);
+
+        if (result == NULL) {
+            response_json["success"] = false;
+            response_json["message"] = string("获取管理员身份结果失败: ") + mysql_error(conn);
+
+            mysql_close(conn);
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        MYSQL_ROW row = mysql_fetch_row(result);
+
+        if (row == NULL) {
+            response_json["success"] = true;
+            response_json["message"] = "当前用户不是管理员";
+            response_json["is_admin"] = false;
+            response_json["level"] = 0;
+        }
+        else {
+            int level = row[0] ? atoi(row[0]) : 0;
+
+            response_json["success"] = true;
+            response_json["message"] = "当前用户是管理员";
+            response_json["is_admin"] = true;
+            response_json["level"] = level;
+        }
+
+        mysql_free_result(result);
+        mysql_close(conn);
 
         res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
     });

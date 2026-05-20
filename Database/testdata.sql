@@ -25,6 +25,17 @@ ALTER TABLE user AUTO_INCREMENT = 1;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
+INSERT INTO user(user_id, user_name, password)
+VALUES (1, 'system', '123456')
+ON DUPLICATE KEY UPDATE
+user_name = VALUES(user_name),
+password = VALUES(password);
+
+INSERT INTO admin(user_id, level)
+VALUES (1, 3)
+ON DUPLICATE KEY UPDATE
+level = 3;
+
 -- 插入用户数据（默认用户ID为1的用户已在建立数据库时创建，这里插入更多用户用于测试）
 INSERT INTO user(user_id, user_name, password, contact, status, intro) VALUES
 (2, 'mika', '123456', 'QQ:10001', 1, '喜欢明日方舟和偶像番，常收集吧唧和透卡'),

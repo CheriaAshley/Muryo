@@ -12,7 +12,7 @@
 <div class="page">
 
     <header class="topbar">
-        <div class="logo" onclick="goHome()">Muryo ~</div>
+        <div class="logo">Muryo ~</div>
 
         <div class="user-actions">
             <span id="welcomeText"></span>
@@ -28,7 +28,7 @@
                 <li onclick="goHome()">首页</li>
                 <li onclick="goMyPage()">我的主页</li>
                 <li onclick="goMyApply()">我的申请</li>
-                <li onclick="goMyTrade()">我的交换</li>
+                <li onclick="goMyExchange()">我的交换</li>
                 <li class="active" onclick="goTodoApply()">待办申请</li>
             </ul>
         </aside>
@@ -40,11 +40,14 @@
             </div>
 
             <div class="apply-section">
+                <div class="section-title-row">
                 <h2>我收到的待办申请</h2>
-                <div class="apply-list" id="todoList">
-                    <p>正在加载待办申请...</p>
+                <span id="todoCountText">正在统计...</span>
                 </div>
-            </div>
+                <div class="apply-list" id="todoList">
+                    <p class="loading-text">正在加载待办申请...</p>
+                </div>
+            </div> 
         </section>
 
     </div>
