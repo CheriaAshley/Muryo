@@ -2,6 +2,8 @@ window.onload = function () {
     if (!checkLogin()) return;
 
     updateLoginState();
+    updateAdminEntry();
+    updateLoginState();
     loadMyExchange();
 };
 

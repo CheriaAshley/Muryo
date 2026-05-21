@@ -71,6 +71,48 @@ function updateLoginState() {
         }
     }
 }
+function updateAdminEntry() {
+    const user = getCurrentUser();
+    const adminEntry = document.getElementById("adminEntry");
+
+    if (!adminEntry) return;
+
+    if (user === null) {
+        adminEntry.style.display = "none";
+        return;
+    }
+
+    fetch(`http://127.0.0.1:8080/admin/me?user_id=${encodeURIComponent(user.user_id)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.is_admin) {
+                localStorage.setItem("is_admin", "1");
+                localStorage.setItem("admin_level", data.level);
+                adminEntry.style.display = "block";
+            } else {
+                localStorage.removeItem("is_admin");
+                localStorage.removeItem("admin_level");
+                adminEntry.style.display = "none";
+            }
+        })
+        .catch(error => {
+            console.error("管理员身份查询失败:", error);
+            adminEntry.style.display = "none";
+        });
+}
+
+function goAdminCenter() {
+    if (!checkLogin()) return;
+
+    const isAdmin = localStorage.getItem("is_admin");
+
+    if (isAdmin !== "1") {
+        alert("你还不是管理员哦~");
+        return;
+    }
+
+    window.location.href = "admin.html";
+}
 
 function goLogin() {
     window.location.href = "login.html";
@@ -92,7 +134,7 @@ function goMyApply() {
 
 function goMyExchange() {
     if (!checkLogin()) return;
-    window.location.href = "mytrade.html";
+    window.location.href = "myexchange.html";
 }
 
 function goTodoApply() {

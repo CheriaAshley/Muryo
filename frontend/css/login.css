@@ -6,9 +6,9 @@
 
 body {
     font-family: 'Nunito', 'Microsoft YaHei', sans-serif;
-    background: linear-gradient(135deg, #f7edc5, #f1ddb0);
+    background: linear-gradient(135deg, #f6efe3, #e8dbc5);
     min-height: 100vh;
-    color: #5a4a3c;
+    color: #5e4d3d;
 }
 
 /* 页面整体居中 */
@@ -24,11 +24,11 @@ body {
 /* 登录卡片 */
 .formbox {
     width: 430px;
-    background: rgba(255, 250, 240, 0.96);
+    background: rgba(255, 248, 237, 0.94);
     border-radius: 28px;
-    padding: 42px 38px;
-    box-shadow: 0 10px 30px rgba(120, 92, 36, 0.14);
-    border: 1px solid rgba(214, 190, 120, 0.35);
+    padding: 52px 38px 46px;
+    box-shadow: 0 8px 22px rgba(150, 120, 80, 0.12);
+    border: 1px solid #eadcc7;
     text-align: center;
 }
 
@@ -36,8 +36,8 @@ body {
 .title {
     font-size: 32px;
     font-weight: 700;
-    color: #7d5b22;
-    margin-bottom: 10px;
+    color: #74542e;
+    margin-bottom: 30px;
 }
 
 .subtitle {
@@ -52,34 +52,34 @@ input {
     height: 50px;
     margin-bottom: 18px;
     padding: 0 16px;
-    border: 1px solid #dcc68a;
+    border: 1px solid #eadcc7;
     border-radius: 15px;
-    background-color: #fffaf0;
+    background-color: #fffaf2;
     font-size: 15px;
     outline: none;
     transition: 0.2s;
-    color: #5a4a3c;
+    color: #5e4d3d;
 }
 
 input:focus {
-    border-color: #caa04a;
-    box-shadow: 0 0 0 4px rgba(202, 160, 74, 0.15);
+    border-color: #c9a66b;
+    box-shadow: 0 0 0 4px rgba(201, 166, 107, 0.18);
 }
 
 /* 输入框提示文字 */
 input::placeholder {
-    color: #b19a6c;
+    color: #9a8568;
 }
 
 /* 登录按钮 */
 button {
     width: 100%;
     height: 50px;
-    margin-top: 8px;
+    margin-top: 18px;
     border: none;
     border-radius: 15px;
-    background: #d4aa4f;
-    color: #fffdf6;
+    background: #c9a66b;
+    color: #ffffff;
     font-size: 16px;
     font-weight: 700;
     cursor: pointer;
@@ -87,28 +87,37 @@ button {
 }
 
 button:hover {
-    background: #bc9138;
+    background: #ad8952;
     transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(188, 145, 56, 0.25);
+    box-shadow: 0 6px 18px rgba(150, 120, 80, 0.18);
+}
+
+.message,
+#errorMsg,
+#msg,
+#loginMsg {
+    margin-top: 18px;
+    margin-bottom: 10px;
+    line-height: 1.6;
 }
 
 /* 底部文字 */
 .bottom-text {
-    margin-top: 24px;
+    margin-top: 34px;
     font-size: 14px;
-    color: #866f48;
+    color: #7d6750;
 }
 
 /* 超链接 */
 a {
-    color: #b7892f;
+    color: #b48752;
     text-decoration: none;
     font-weight: 700;
     transition: 0.2s;
 }
 
 a:hover {
-    color: #8f6820;
+    color: #93673a;
 }
 
 /* logo文字 */
@@ -126,6 +135,21 @@ a:hover {
     border-radius: 999px;
     background: #e3c878;
     margin: 0 auto 28px auto;
+}
+
+.msg-text {
+    min-height: 28px;
+    margin-top: 18px;
+    margin-bottom: 18px;
+    line-height: 1.6;
+    color: #b06f5d;
+    font-size: 15px;
+}
+
+.register-text {
+    margin-top: 22px;
+    line-height: 1.7;
+    font-size: 15px;
 }
 
 /* 手机适配 */

@@ -2,6 +2,8 @@ window.onload = function () {
     if (!checkLogin()) return;
 
     updateLoginState();
+    updateLoginState();
+    updateAdminEntry();
     loadMyApplications();
 };
 
@@ -140,4 +142,22 @@ function escapeHtml(str) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#39;");
+}
+
+const imageInput = document.getElementById("itemImage");
+
+if (imageInput) {
+
+    imageInput.addEventListener("change", function () {
+
+        const nameText = document.getElementById("selectedImageName");
+
+        if (this.files.length > 0) {
+            nameText.innerText =
+                "已选择图片：" + this.files[0].name;
+        } else {
+            nameText.innerText = "";
+        }
+
+    });
 }

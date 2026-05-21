@@ -2,6 +2,8 @@ window.onload = function () {
     if (!checkLogin()) return;
 
     updateLoginState();
+    updateLoginState();
+    updateAdminEntry();
     loadTodoApply();
 };
 

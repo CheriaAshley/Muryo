@@ -11,7 +11,7 @@
 
 <div class="container">
     <div class="formbox">
-        <h2>加入 Muryo ~</h2>
+        <h2 class="title">加入 Muryo ~</h2>
 
         <form onsubmit="register(); return false;">
             <input type="text" id="username" name="username" placeholder="咪请输入想注册的用户名~">
@@ -21,9 +21,12 @@
              <button type="submit" id="registerBtn">注册</button>
         </form>
 
-        <p id="msg"></p>
+        <p id="msg" class="msg-text"></p>
 
-        <p>已经有账号了？<a href="login.html">回到登录</a></p>
+        <p class="register-text">
+            已经有账号了？
+            <a href="login.html">回到登录</a>
+        </p>
     </div>
 </div>
 

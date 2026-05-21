@@ -336,7 +336,7 @@ int main() {
             "application/json; charset=UTF-8"
         );
     });
-
+    
     //发布制品
     svr.Post("/items/publish", [](const Request& req, Response& res) {
         set_cors(res);
@@ -350,7 +350,7 @@ int main() {
         string quantity = req.get_param_value("quantity");
         string img_url = req.get_param_value("img_url");
         string intro = req.get_param_value("intro");
-        
+
         if (owner.empty()) {
             response_json["success"] = false;
             response_json["message"] = "请先登录后再发布制品";
@@ -367,7 +367,7 @@ int main() {
             response_json["message"] = "咪，制品名称、角色和类型不能为空~";
 
             res.set_content(
-                response_json.toStyledString(), 
+                response_json.toStyledString(),
                 "application/json;charset=UTF-8"
             );
             return;
@@ -387,7 +387,7 @@ int main() {
             response_json["message"] = "咪，数量只能是数字哦~";
 
             res.set_content(
-                response_json.toStyledString(), 
+                response_json.toStyledString(),
                 "application/json;charset=UTF-8"
             );
             return;
@@ -398,7 +398,7 @@ int main() {
             response_json["message"] = "咪，数量必须大于0哦~";
 
             res.set_content(
-                response_json.toStyledString(), 
+                response_json.toStyledString(),
                 "application/json;charset=UTF-8"
             );
             return;
@@ -417,7 +417,7 @@ int main() {
             response_json["success"] = false;
             response_json["message"] = "数据库连接失败";
             res.set_content(
-                response_json.toStyledString(), 
+                response_json.toStyledString(),
                 "application/json;charset=UTF-8"
             );
             return;
@@ -462,17 +462,17 @@ int main() {
             response_json["error"] = err;
 
             res.set_content(
-                response_json.toStyledString(), 
+                response_json.toStyledString(),
                 "application/json;charset=UTF-8"
             );
             return;
         }
-       
+
         response_json["success"] = true;
         response_json["message"] = "发布成功！快去和同好交换吧~";
 
         res.set_content(
-            response_json.toStyledString(), 
+            response_json.toStyledString(),
             "application/json;charset=UTF-8"
         );
 

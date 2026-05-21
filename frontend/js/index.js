@@ -2,6 +2,8 @@ let allItems = [];
 
 window.onload = function () {
     updateLoginState();
+    updateLoginState();
+    updateAdminEntry();
     loadItems();
 };
 

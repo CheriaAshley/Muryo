@@ -2,6 +2,7 @@ window.onload = function () {
     if (!checkLogin()) return;
 
     updateLoginState();
+    updateAdminEntry();
     loadProfile();
     loadMyItems();
 };
@@ -21,12 +22,12 @@ function loadProfile() {
             const profile = data.data;
 
             profileCard.innerHTML = `
-                <h2>个人信息</h2>
-                <p><strong>用户ID：</strong>${data.user_id}</p>
-                <p><strong>用户名：</strong>${data.user_name || "暂无"}</p>
-                <p><strong>联系方式：</strong>${data.contact || "暂无"}</p>
-                <p><strong>个人介绍：</strong>${data.introduction || "这个人很神秘，还没有留下介绍~"}</p>
-            `;
+            <h2>个人信息</h2>
+            <p><strong>用户ID：</strong>${profile.user_id}</p>
+            <p><strong>用户名：</strong>${profile.user_name || "暂无"}</p>
+            <p><strong>联系方式：</strong>${profile.contact || "暂无"}</p>
+            <p><strong>个人介绍：</strong>${profile.introduction || profile.intro || "这个人很神秘，还没有留下介绍~"}</p>
+        `;
         })
         .catch(error => {
             console.error("加载个人信息失败:", error);
@@ -127,7 +128,7 @@ function publishItem() {
     const role = document.getElementById("role").value.trim();
     const type = document.getElementById("type").value.trim();
     const quantity = document.getElementById("quantity").value.trim();
-    const img_url = document.getElementById("img_url").value.trim();
+    // 忽略图片输入，后端直接使用默认图片
     const intro = document.getElementById("intro").value.trim();
     const publishBtn = document.getElementById("publishBtn");
 
@@ -136,12 +137,7 @@ function publishItem() {
         return;
     }
 
-    if (!quantity) {
-        alert("咪，数量必须大于0哦~");
-        return;
-    }
-
-    if (Number(quantity) <= 0) {
+    if (!quantity || Number(quantity) <= 0) {
         alert("咪，数量必须大于0哦~");
         return;
     }
@@ -157,9 +153,7 @@ function publishItem() {
     params.append("role", role);
     params.append("type", type);
     params.append("quantity", quantity);
-    params.append("img_url", img_url);
     params.append("intro", intro);
-
 
     fetch("http://127.0.0.1:8080/items/publish", {
         method: "POST",

@@ -3,6 +3,8 @@ let ownerItems = [];
 let isFavorite = false;
 
 window.onload = function () {
+    updateLoginState();
+    updateAdminEntry();
     loadItemDetail();
 };
 
@@ -360,7 +362,7 @@ function addFavorite() {
     })
     .then(response => response.json())
     .then(data => {
-        alert(data.message || "操作完成");
+        // alert(data.message || "操作完成");
 
         if (data.success) {
             isFavorite = true;
@@ -389,7 +391,7 @@ function removeFavorite() {
     })
     .then(response => response.json())
     .then(data => {
-        alert(data.message || "操作完成");
+        // alert(data.message || "操作完成");
 
         if (data.success) {
             isFavorite = false;

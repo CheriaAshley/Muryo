@@ -6,8 +6,8 @@
 
 body {
     font-family: 'Nunito', 'Microsoft YaHei', sans-serif;
-    background: linear-gradient(135deg, #f7edc5, #f3dfaa);
-    color: #5a4a3c;
+    background: linear-gradient(135deg, #f6efe3, #e8dbc5);
+    color: #5e4d3d;
     min-height: 100vh;
 }
 
@@ -18,12 +18,12 @@ body {
 /* 顶部栏 */
 .topbar {
     height: 76px;
-    background-color: #fff8df;
+    background-color: #fffaf1;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 36px;
-    box-shadow: 0 4px 18px rgba(120, 92, 36, 0.12);
+    box-shadow: 0 4px 18px rgba(150, 120, 80, 0.12);
     position: sticky;
     top: 0;
     z-index: 100;
@@ -32,13 +32,15 @@ body {
 .logo {
     font-size: 30px;
     font-weight: 700;
-    color: #d4aa4f;
+    color: #b48752;
     letter-spacing: 1px;
 }
 
 /* 搜索框 */
 .search-box {
     display: flex;
+    margin-left: 36px;
+    margin-right: auto;
     align-items: center;
     gap: 12px;
 }
@@ -46,18 +48,18 @@ body {
 .search-box input {
     width: 320px;
     height: 42px;
-    border: 1px solid #dec88b;
+    border: 1px solid #eadcc7;
     border-radius: 999px;
     padding: 0 18px;
     outline: none;
     font-size: 15px;
-    background-color: #fffaf0;
-    color: #5a4a3c;
+    background-color: #fffaf2;
+    color: #5e4d3d;
 }
 
 .search-box input:focus {
-    border-color: #cfa75b;
-    box-shadow: 0 0 0 3px rgba(207, 167, 91, 0.16);
+    border-color: #c9a66b;
+    box-shadow: 0 0 0 3px rgba(201, 166, 107, 0.18);
 }
 
 .search-box button {
@@ -65,15 +67,15 @@ body {
     padding: 0 22px;
     border: none;
     border-radius: 999px;
-    background-color: #d4aa4f;
-    color: #fffaf0;
+    background-color: #c9a66b;
+    color: white;
     cursor: pointer;
     font-size: 14px;
     transition: 0.2s;
 }
 
 .search-box button:hover {
-    background-color: #b98d35;
+    background-color: #ad8952;
     transform: translateY(-1px);
 }
 
@@ -96,29 +98,29 @@ body {
 }
 
 #loginBtn {
-    background-color: #d4aa4f;
+    background-color: #c9ab83;
     color: #fffaf0;
 }
 
 #loginBtn:hover {
-    background-color: #b98d35;
+    background-color: #b59368;
     transform: translateY(-1px);
 }
 
 #logoutBtn {
-    background-color: #ead99f;
-    color: #5f4a21;
+    background-color: #b99862;
+    color: white;
 }
 
 #logoutBtn:hover {
-    background-color: #d8bd6c;
+    background-color: #9f7f4e;
     transform: translateY(-1px);
 }
 
 #welcomeText {
     font-size: 14px;
-    color: #6a5632;
-    background-color: #fff1c7;
+    color: #78644d;
+    background-color: #efe4d1;
     padding: 7px 14px;
     border-radius: 999px;
 }
@@ -127,16 +129,19 @@ body {
 .main {
     display: flex;
     min-height: calc(100vh - 76px);
-    max-width: 1480px;
-    margin: 0 auto;
+    width: 100%;
 }
 
 /* 左侧栏 */
 .sidebar {
     width: 240px;
-    background-color: rgba(255, 250, 240, 0.82);
+    background-color: #fff8ed;
     padding: 34px 22px;
-    border-right: 1px solid #dfca8e;
+    border-right: 1px solid #e6d7bf;
+    position: sticky;
+    top: 76px;
+    height: calc(100vh - 76px);
+    align-self: flex-start;
 }
 
 .sidebar ul {
@@ -154,14 +159,15 @@ body {
 }
 
 .sidebar li:hover {
-    background-color: #fff1c7;
-    color: #8a681f;
+    background-color: #f0dfc4;
+    color: #93673a;
 }
 
 .sidebar .active {
-    background-color: #d4aa4f;
-    color: #fffaf0;
+    background-color: #c9a66b;
+    color: white;
     font-weight: 700;
+    box-shadow: 0 6px 14px rgba(140, 105, 60, 0.2);
 }
 
 /* 右侧内容 */
@@ -172,15 +178,15 @@ body {
 
 .content-header {
     margin-bottom: 28px;
-    background-color: rgba(255, 250, 240, 0.56);
-    border: 1px solid rgba(223, 202, 142, 0.55);
+    background-color: rgba(255, 248, 237, 0.82);
+    border: 1px solid #eadcc7;
     border-radius: 22px;
     padding: 24px 28px;
 }
 
 .content-header h1 {
     font-size: 34px;
-    color: #7f5f23;
+    color: #74542e;
     margin-bottom: 8px;
 }
 
@@ -205,11 +211,11 @@ body {
 /* 卡片 */
 .item-card {
     height: 390px;
-    background-color: #fffaf0;
-    border: 1px solid #e4cf91;
+    background-color: #fffaf2;
+    border: 1px solid #eadcc7;
+    box-shadow: 0 8px 20px rgba(150, 120, 80, 0.12);
     border-radius: 20px;
     padding: 14px;
-    box-shadow: 0 8px 22px rgba(120, 92, 36, 0.12);
     transition: 0.25s;
     cursor: pointer;
     overflow: hidden;
@@ -217,7 +223,7 @@ body {
 
 .item-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 12px 28px rgba(120, 92, 36, 0.2);
+    box-shadow: 0 12px 26px rgba(150, 120, 80, 0.18);
 }
 
 .item-img_url {
@@ -225,7 +231,7 @@ body {
     height: 145px;
     object-fit: cover;
     border-radius: 15px;
-    background-color: #ead89d;
+    background-color: #f6eddf;
     display: block;
     margin-bottom: 12px;
 }
@@ -233,7 +239,7 @@ body {
 .item-info h3 {
     height: 30px;
     font-size: 19px;
-    color: #7f5f23;
+    color: #74542e;
     margin-bottom: 8px;
     overflow: hidden;
     white-space: nowrap;

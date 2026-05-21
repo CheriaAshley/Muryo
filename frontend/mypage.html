@@ -30,6 +30,7 @@
                 <li onclick="goMyApply()">我的申请</li>
                 <li onclick="goMyExchange()">我的交换</li>
                 <li onclick="goTodoApply()">待办申请</li>
+                <li id="adminEntry" onclick="goAdminCenter()" style="display: none;">管理员中心</li>
             </ul>
         </aside>
 
@@ -49,7 +50,6 @@
             </div>
 
             <div class="my-items-section">
-                <h2>我的制品</h2>
                 <div class="section-title-row">
                     <h2>我的制品</h2>
                     <span id="myItemCountText">正在统计...</span>
@@ -85,8 +85,10 @@
             <label>数量</label>
             <input type="number" id="quantity" min="1" required>
 
-            <label>制品图片地址</label>
-            <input type="text" id="img_url" placeholder="可以先不填，默认使用占位图">
+            <label>上传制品图片</label>
+
+            <input type="file" id="itemImage" accept="image/*">
+            <p id="selectedImageName" class="upload-tip"></p>
 
             <label>介绍</label>
             <textarea id="intro" rows="4" placeholder="简单介绍一下这个制品吧~"></textarea>

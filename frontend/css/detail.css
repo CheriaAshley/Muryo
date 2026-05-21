@@ -6,8 +6,8 @@
 
 body {
     font-family: 'Nunito', 'Microsoft YaHei', sans-serif;
-    background: linear-gradient(135deg, #f7edc5, #f3dfaa);
-    color: #5a4a3c;
+    background: linear-gradient(135deg, #f6efe3, #e8dbc5);
+    color: #5e4d3d;
     min-height: 100vh;
 }
 
@@ -26,8 +26,8 @@ body {
     padding: 10px 20px;
     border: none;
     border-radius: 999px;
-    background-color: #d4aa4f;
-    color: #fffaf0;
+    background-color: #c9a66b;
+    color: white;
     font-size: 15px;
     cursor: pointer;
 }
@@ -36,10 +36,10 @@ body {
     width: 100%;
     max-width: 1120px;
     margin: 0 auto;
-    background-color: #fff8df;
+    background-color: rgba(255, 248, 237, 0.9);
     border-radius: 24px;
     padding: 28px;
-    box-shadow: 0 12px 32px rgba(120, 92, 36, 0.16);
+    box-shadow: 0 8px 22px rgba(150, 120, 80, 0.12);
 }
 
 .detail-card {
@@ -54,7 +54,7 @@ body {
     height: 420px;
     border-radius: 20px;
     overflow: hidden;
-    background-color: #ead89d;
+    background-color: #f6eddf;
 }
 
 .detail-img_url {
@@ -73,7 +73,7 @@ body {
 
 .detail-info h1 {
     font-size: 32px;
-    color: #7f5f23;
+    color: #74542e;
     margin-bottom: 18px;
 }
 
@@ -85,7 +85,7 @@ body {
 
 .detail-info span {
     font-weight: 700;
-    color: #6d552d;
+    color: #805d36;
 }
 
 .detail-actions {
@@ -117,13 +117,13 @@ body {
 }
 
 .apply-btn {
-    background-color: #d4aa4f;
-    color: #fffaf0;
+    background-color: #c9a66b;
+    color: white;
 }
 
 .back-btn {
-    background-color: #ead99f;
-    color: #5f4a21;
+    background-color: #efe4d1;
+    color: #78644d;
 }
 
 .favorite-btn {
@@ -131,11 +131,15 @@ body {
     height: 46px;
     border-radius: 50%;
     border: 2px solid #d7a49a;
-    background-color: #fff8df;
+    background-color: #fffaf2;
     color: #b67c70;
     font-size: 25px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     line-height: 1;
+    padding: 0;
 }
 
 .favorite-btn.active {
@@ -147,7 +151,7 @@ body {
 .owner-items-section {
     margin-top: 32px;
     padding-top: 26px;
-    border-top: 1px solid #dfca8e;
+    border-top: 1px solid #eadcc7;
 }
 
 .owner-items-section h2 {
@@ -168,12 +172,12 @@ body {
 
 .owner-item-card {
     height: 360px;
-    background-color: #fffaf0;
-    border: 1px solid #e4cf91;
+    background-color: #fffaf2;
+    border: 1px solid #eadcc7;
+    box-shadow: 0 8px 20px rgba(150, 120, 80, 0.1);
     border-radius: 18px;
     padding: 14px;
     position: relative;
-    box-shadow: 0 8px 20px rgba(120, 92, 36, 0.1);
 }
 
 .choose-item {
@@ -182,7 +186,7 @@ body {
     left: 14px;
     width: 18px;
     height: 18px;
-    accent-color: #d4aa4f;
+    accent-color: #c9a66b;
     z-index: 2;
 }
 
@@ -191,7 +195,7 @@ body {
     height: 130px;
     object-fit: cover;
     border-radius: 14px;
-    background-color: #ead89d;
+    background-color: #f6eddf;
     margin-bottom: 12px;
 }
 
@@ -226,11 +230,34 @@ body {
 
 .choose-quantity {
     width: 74px;
-    padding: 6px;
+    padding: 6px 8px;
     margin-left: 6px;
-    border-radius: 8px;
-    border: 1px solid #d6bd78;
-    background-color: #fff8df;
+    border-radius: 10px;
+    border: 1px solid #eadcc7;
+    background-color: #fffaf2;
+    color: #5e4d3d;
+    outline: none;
+    font-family: 'Nunito', 'Microsoft YaHei', sans-serif;
+}
+.choose-quantity:focus {
+    border-color: #c9a66b;
+    box-shadow: 0 0 0 3px rgba(201, 166, 107, 0.18);
+}
+.detail-info input[type="number"] {
+    width: 74px;
+    padding: 6px 8px;
+    margin-left: 6px;
+    border-radius: 10px;
+    border: 1px solid #eadcc7;
+    background-color: #fffaf2;
+    color: #5e4d3d;
+    outline: none;
+    font-family: 'Nunito', 'Microsoft YaHei', sans-serif;
+}
+
+.detail-info input[type="number"]:focus {
+    border-color: #c9a66b;
+    box-shadow: 0 0 0 3px rgba(201, 166, 107, 0.18);
 }
 
 .loading-text,
