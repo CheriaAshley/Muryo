@@ -2,7 +2,6 @@ window.onload = function () {
     if (!checkLogin()) return;
 
     updateLoginState();
-    updateLoginState();
     updateAdminEntry();
     loadTodoApply();
 };
@@ -89,6 +88,7 @@ function renderActionButtons(item) {
     const status = Number(item.status);
 
     if (status === 0) {
+        // 状态为 0 (待处理) 时，显示同意和拒绝
         return `
             <button class="action-btn btn-agree" onclick="handleExchange(${item.exchange_id}, 'agree')">同意</button>
             <button class="action-btn btn-reject" onclick="handleExchange(${item.exchange_id}, 'reject')">拒绝</button>
@@ -96,8 +96,10 @@ function renderActionButtons(item) {
     }
 
     if (status === 2) {
+        // 状态为 2 (已同意待交换) 时，显示已完成和取消交换
         return `
             <button class="action-btn btn-complete" onclick="handleExchange(${item.exchange_id}, 'complete')">已完成</button>
+            <button class="action-btn btn-cancel" onclick="handleExchange(${item.exchange_id}, 'cancel')">取消</button>
         `;
     }
 
@@ -106,6 +108,11 @@ function renderActionButtons(item) {
 
 function handleExchange(exchangeId, action) {
     const user = getCurrentUser();
+
+    // 为了防止误触取消，可以增加一个小确认框（可选）
+    if (action === 'cancel' && !confirm("确定要取消这个交换吗？")) {
+        return;
+    }
 
     const params = new URLSearchParams();
     params.append("exchange_id", exchangeId);

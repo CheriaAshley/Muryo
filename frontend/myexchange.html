@@ -10,6 +10,7 @@
 <body>
 
 <div class="page">
+    
     <header class="topbar">
         <div class="logo">Muryo ~</div>
 
@@ -21,6 +22,7 @@
     </header>
 
     <div class="main">
+        
         <aside class="sidebar">
             <ul>
                 <li onclick="goHome()">首页</li>
@@ -33,22 +35,21 @@
         </aside>
 
         <section class="content">
+            
             <div class="content-header">
-                <h1>我的交换</h1>
-                <p>查看别人向我发起的申请，待处理申请会优先显示</p>
+                <div class="header-info">
+                    <h1>我的交换</h1>
+                    <p>查看别人向我发起的申请，待处理申请会优先显示</p>
+                </div>
+                <div id="tradeCountText">正在统计...</div>
             </div>
 
-            <div class="trade-section">
-                <div class="section-title-row">
-                    <h2>别人向我发起的申请</h2>
-                    <span id="tradeCountText">正在统计...</span>
-                </div>
-
-                <div class="trade-list" id="tradeList">
-                    <p class="loading-text">正在加载我的交换...</p>
-                </div>
+            <div class="trade-list" id="tradeList">
+                <p class="loading-text">正在加载我的交换...</p>
             </div>
+            
         </section>
+        
     </div>
 </div>
 

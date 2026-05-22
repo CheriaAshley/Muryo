@@ -6,8 +6,8 @@
 
 body {
     font-family: 'Nunito', 'Microsoft YaHei', sans-serif;
-    background: linear-gradient(135deg, #f7edc5, #f3dfaa);
-    color: #5a4a3c;
+    background: linear-gradient(135deg, #f6efe3, #e8dbc5);
+    color: #5e4d3d;
     min-height: 100vh;
 }
 
@@ -15,15 +15,15 @@ body {
     min-height: 100vh;
 }
 
-/* 顶部栏 */
+/* 顶部栏 - 参数严格对齐 index.css */
 .topbar {
     height: 76px;
-    background-color: #fff8df;
+    background-color: #fffaf1;
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
     padding: 0 36px;
-    box-shadow: 0 4px 18px rgba(120, 92, 36, 0.12);
+    box-shadow: 0 4px 18px rgba(150, 120, 80, 0.12);
     position: sticky;
     top: 0;
     z-index: 100;
@@ -32,11 +32,10 @@ body {
 .logo {
     font-size: 30px;
     font-weight: 700;
-    color: #d4aa4f;
+    color: #b48752;
     letter-spacing: 1px;
 }
 
-/* 右上角用户区 */
 .user-actions {
     display: flex;
     align-items: center;
@@ -46,8 +45,8 @@ body {
 
 #welcomeText {
     font-size: 14px;
-    color: #6a5632;
-    background-color: #fff1c7;
+    color: #78644d;
+    background-color: #efe4d1;
     padding: 7px 14px;
     border-radius: 999px;
 }
@@ -62,41 +61,31 @@ body {
     transition: 0.2s;
 }
 
-#loginBtn {
-    background-color: #d4aa4f;
-    color: #fffaf0;
-}
-
-#logoutBtn {
-    background-color: #ead99f;
-    color: #5f4a21;
-}
-
-#loginBtn:hover,
-#logoutBtn:hover {
-    transform: translateY(-1px);
-}
+#loginBtn { background-color: #c9ab83; color: #fffaf0; }
+#loginBtn:hover { background-color: #b59368; transform: translateY(-1px); }
+#logoutBtn { background-color: #b99862; color: white; }
+#logoutBtn:hover { background-color: #9f7f4e; transform: translateY(-1px); }
 
 /* 主体布局 */
 .main {
     display: flex;
     min-height: calc(100vh - 76px);
-    max-width: 1480px;
-    margin: 0 auto;
+    width: 100%;
 }
 
-/* 左侧栏 */
+/* 左侧栏 - 颜色与固定布局与 index.css 完全一致 */
 .sidebar {
     width: 240px;
-    background-color: rgba(255, 250, 240, 0.82);
+    background-color: #fff8ed;
     padding: 34px 22px;
-    border-right: 1px solid #dfca8e;
+    border-right: 1px solid #e6d7bf;
+    position: sticky;
+    top: 76px;
+    height: calc(100vh - 76px);
+    align-self: flex-start;
 }
 
-.sidebar ul {
-    list-style: none;
-}
-
+.sidebar ul { list-style: none; }
 .sidebar li {
     padding: 16px 18px;
     margin-bottom: 14px;
@@ -106,16 +95,15 @@ body {
     color: #6b5a4a;
     transition: 0.2s;
 }
-
 .sidebar li:hover {
-    background-color: #fff1c7;
-    color: #8a681f;
+    background-color: #f0dfc4;
+    color: #93673a;
 }
-
 .sidebar li.active {
-    background-color: #d4aa4f;
-    color: #fffaf0;
+    background-color: #c9a66b;
+    color: white;
     font-weight: 700;
+    box-shadow: 0 6px 14px rgba(140, 105, 60, 0.2);
 }
 
 /* 右侧内容 */
@@ -124,338 +112,161 @@ body {
     padding: 42px 44px;
 }
 
+/* 头部块 - 参数提取自 index.css 的 content-header */
 .content-header {
-    margin-bottom: 28px;
-    background-color: rgba(255, 250, 240, 0.56);
-    border: 1px solid rgba(223, 202, 142, 0.55);
-    border-radius: 22px;
-    padding: 24px 28px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.content-header h1 {
-    font-size: 34px;
-    color: #7f5f23;
-    margin-bottom: 8px;
-}
-
-.content-header p {
-    font-size: 16px;
-    color: #7d6a43;
-}
-
-.publish-btn {
-    padding: 12px 24px;
-    border: none;
-    border-radius: 999px;
-    background-color: #d4aa4f;
-    color: #fffaf0;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: 'Nunito', 'Microsoft YaHei', sans-serif;
-    box-shadow: 0 6px 16px rgba(120, 92, 36, 0.16);
-    transition: 0.2s;
-}
-
-.publish-btn:hover {
-    background-color: #b98d35;
-    transform: translateY(-2px);
-}
-
-/* 个人信息卡片 */
-.profile-card {
-    background-color: #fffaf0;
-    border: 1px solid #e4cf91;
-    border-radius: 22px;
-    padding: 24px;
-    box-shadow: 0 8px 22px rgba(120, 92, 36, 0.12);
     margin-bottom: 28px;
-}
-
-.profile-card h2 {
-    font-size: 24px;
-    color: #7f5f23;
-    margin-bottom: 16px;
-}
-
-.profile-card p {
-    font-size: 15px;
-    color: #5f503e;
-    margin-bottom: 10px;
-    line-height: 1.7;
-}
-
-/* 我的制品区域 */
-.my-items-section {
-    background-color: rgba(255, 250, 240, 0.45);
-    border: 1px solid rgba(223, 202, 142, 0.42);
+    background-color: rgba(255, 248, 237, 0.82);
+    border: 1px solid #eadcc7;
     border-radius: 22px;
-    padding: 24px;
+    padding: 24px 28px;
 }
 
+.content-header h1 { font-size: 34px; color: #74542e; margin-bottom: 8px; }
+.content-header p { font-size: 16px; color: #7d6a43; }
+
+/* 发布按钮 - 提取自 index.css 搜索按钮的交互色系 */
+.publish-btn {
+    background-color: #c9a66b;
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 999px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+    box-shadow: 0 4px 12px rgba(201, 166, 107, 0.3);
+}
+.publish-btn:hover { background-color: #ad8952; transform: translateY(-2px); }
+
+/* 个人信息卡片 - 使用 index.css 卡片色盘 */
+.profile-card {
+    background-color: #fffaf2;
+    border: 1px solid #eadcc7;
+    border-radius: 22px;
+    padding: 24px 28px;
+    margin-bottom: 32px;
+    box-shadow: 0 8px 20px rgba(150, 120, 80, 0.12);
+}
+.profile-card h2 { font-size: 24px; color: #74542e; margin-bottom: 16px; }
+.profile-card p { color: #5f503e; line-height: 1.8; font-size: 15px; }
+
+/* 制品区块 */
 .section-title-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 18px;
 }
+.section-title-row h2 { font-size: 24px; color: #74542e; }
 
-.section-title-row h2,
-.my-items-section h2 {
-    font-size: 24px;
-    color: #7f5f23;
-}
-
+/* 数量文本 - 匹配 index.css 的 item-count-text */
 #myItemCountText {
+    margin-top: 8px;
     font-size: 14px;
-    color: #7d6a43;
-    background-color: #fff1c7;
-    padding: 6px 12px;
-    border-radius: 999px;
+    color: #8a743f;
 }
 
+/* 制品列表和卡片 - 逐字复制自 index.css 保证零误差 */
 .item-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(245px, 1fr));
     gap: 22px;
 }
 
-/* 制品卡片 */
 .item-card {
-    height: 430px;
-    background-color: #fffaf0;
-    border: 1px solid #e4cf91;
+    height: 390px;
+    background-color: #fffaf2;
+    border: 1px solid #eadcc7;
+    box-shadow: 0 8px 20px rgba(150, 120, 80, 0.12);
     border-radius: 20px;
     padding: 14px;
-    overflow: hidden;
-    box-shadow: 0 8px 22px rgba(120, 92, 36, 0.12);
-    cursor: pointer;
     transition: 0.25s;
+    cursor: pointer;
+    overflow: hidden;
+    position: relative; 
 }
 
 .item-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 12px 28px rgba(120, 92, 36, 0.2);
+    box-shadow: 0 12px 26px rgba(150, 120, 80, 0.18);
 }
 
 .item-img_url {
     width: 100%;
     height: 145px;
     object-fit: cover;
-    display: block;
     border-radius: 15px;
-    background-color: #ead89d;
+    background-color: #f6eddf;
+    display: block;
     margin-bottom: 12px;
-}
-
-.item-img_url.placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #8f7852;
-    font-size: 14px;
-}
-
-.item-info {
-    padding: 0 4px;
 }
 
 .item-info h3 {
     height: 30px;
     font-size: 19px;
-    color: #7f5f23;
+    color: #74542e;
     margin-bottom: 8px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
 
-.item-info p {
-    font-size: 14px;
-    color: #5f503e;
-    margin-bottom: 6px;
-    line-height: 1.45;
-}
+.item-info p { font-size: 14px; color: #5f503e; margin-bottom: 6px; line-height: 1.45; }
+.item-info p span { font-weight: 700; color: #5a4a3c; }
 
-.item-info p:nth-of-type(4) {
-    height: 42px;
-    overflow: hidden;
-}
+.loading-text, .empty-text { color: #7d6a43; font-size: 16px; padding: 18px 0; }
 
-.item-info p span {
-    font-weight: 700;
-    color: #5a4a3c;
-}
-
-.delete-item-btn {
-    width: 100%;
-    margin-top: 10px;
-    padding: 9px 0;
-    border: none;
-    border-radius: 999px;
-    background-color: #d99b8d;
-    color: #fffaf0;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: 'Nunito', 'Microsoft YaHei', sans-serif;
-    transition: 0.2s;
-}
-
-.delete-item-btn:hover {
-    background-color: #c47d70;
-}
-
-.empty-text,
-.loading-text {
-    color: #7d6a43;
-    font-size: 16px;
-    padding: 18px 0;
-}
-
-/* 弹窗 */
+/* 发布弹窗 - 使用 index.css 搜索框的色号方案作为输入框基础 */
 .modal-mask {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100vh;
-    background-color: rgba(90, 74, 60, 0.35);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 999;
-    padding: 20px;
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(94, 77, 61, 0.4); z-index: 999;
+    justify-content: center; align-items: center; backdrop-filter: blur(3px);
 }
 
 .modal-box {
-    width: 460px;
-    max-height: 90vh;
-    overflow-y: auto;
-    background-color: #fffaf0;
-    border: 1px solid #e4cf91;
-    border-radius: 24px;
-    padding: 26px;
-    box-shadow: 0 14px 34px rgba(90, 74, 60, 0.22);
+    background-color: #fffaf2; width: 480px; border-radius: 22px; padding: 32px;
+    box-shadow: 0 12px 26px rgba(150, 120, 80, 0.18); border: 1px solid #eadcc7;
 }
 
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 18px;
-}
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.modal-header h2 { color: #74542e; font-size: 22px; }
 
-.modal-header h2 {
-    color: #7f5f23;
-}
-
-.close-btn {
-    font-size: 30px;
-    cursor: pointer;
-    color: #9a7f4c;
-}
-
-.close-btn:hover {
-    color: #6f5524;
-}
-
-#publishForm {
-    display: flex;
-    flex-direction: column;
-}
+.close-btn { cursor: pointer; font-size: 28px; color: #ad8952; transition: 0.2s; }
+.close-btn:hover { color: #74542e; }
 
 #publishForm label {
-    font-size: 14px;
-    color: #6b5a4a;
-    margin-bottom: 6px;
-    margin-top: 10px;
+    display: block; color: #74542e; margin-top: 16px;
+    font-weight: 700; font-size: 14px; margin-bottom: 6px;
 }
 
-#publishForm input,
-#publishForm textarea {
-    border: 1px solid #d6bd78;
-    border-radius: 14px;
-    padding: 11px 12px;
-    font-size: 14px;
-    font-family: 'Nunito', 'Microsoft YaHei', sans-serif;
-    background-color: #fff8df;
-    outline: none;
-    color: #5a4a3c;
+#publishForm input, #publishForm textarea {
+    width: 100%; padding: 12px 16px; border: 1px solid #eadcc7; border-radius: 12px;
+    background-color: #fffaf2; outline: none; font-size: 14px; font-family: inherit; color: #5e4d3d; transition: 0.2s;
 }
 
-#publishForm input:focus,
-#publishForm textarea:focus {
-    border-color: #caa04a;
-    box-shadow: 0 0 0 4px rgba(202, 160, 74, 0.15);
+#publishForm input:focus, #publishForm textarea:focus {
+    border-color: #c9a66b;
+    box-shadow: 0 0 0 3px rgba(201, 166, 107, 0.18);
 }
 
 .submit-btn {
-    margin-top: 20px;
-    padding: 12px 0;
-    border: none;
-    border-radius: 999px;
-    background-color: #d4aa4f;
-    color: #fffaf0;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: 'Nunito', 'Microsoft YaHei', sans-serif;
-    transition: 0.2s;
+    width: 100%; margin-top: 30px; padding: 14px; background-color: #c9a66b; color: white;
+    border: none; border-radius: 12px; cursor: pointer; font-size: 16px; font-weight: 700; transition: 0.2s;
 }
+.submit-btn:hover { background-color: #ad8952; }
 
-.submit-btn:hover {
-    background-color: #b98d35;
-}
-
+/* 响应式 - 对齐 index.css */
 @media (max-width: 900px) {
-    .topbar {
-        height: auto;
-        padding: 18px;
-        flex-wrap: wrap;
-        gap: 14px;
-    }
-
-    .main {
-        flex-direction: column;
-    }
-
-    .sidebar {
-        width: 100%;
-        border-right: none;
-        border-bottom: 1px solid #dfca8e;
-    }
-
-    .sidebar ul {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-
-    .sidebar li {
-        margin-bottom: 0;
-    }
-
-    .content {
-        padding: 28px 20px;
-    }
-
-    .content-header {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 16px;
-    }
-
-    .section-title-row {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .modal-box {
-        width: 100%;
-    }
+    .topbar { height: auto; padding: 18px; flex-wrap: wrap; gap: 14px; }
+    .main { flex-direction: column; }
+    .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #dfca8e; position: static; height: auto;}
+    .sidebar ul { display: flex; flex-wrap: wrap; gap: 10px; }
+    .sidebar li { margin-bottom: 0; }
+    .content { padding: 28px 20px; }
+    .content-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .modal-box { width: 90%; }
 }

@@ -6,8 +6,9 @@
 
 body {
     font-family: 'Nunito', 'Microsoft YaHei', sans-serif;
-    background: linear-gradient(135deg, #f7edc5, #f3dfaa);
-    color: #5a4a3c;
+    /* 严格对齐 index.css 的全局背景渐变 */
+    background: linear-gradient(135deg, #f6efe3, #e8dbc5);
+    color: #5e4d3d;
     min-height: 100vh;
 }
 
@@ -15,15 +16,15 @@ body {
     min-height: 100vh;
 }
 
-/* 顶部栏 */
+/* 顶部栏 - 严格对齐 index.css */
 .topbar {
     height: 76px;
-    background-color: #fff8df;
+    background-color: #fffaf1;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 36px;
-    box-shadow: 0 4px 18px rgba(120, 92, 36, 0.12);
+    box-shadow: 0 4px 18px rgba(150, 120, 80, 0.12);
     position: sticky;
     top: 0;
     z-index: 100;
@@ -32,7 +33,7 @@ body {
 .logo {
     font-size: 30px;
     font-weight: 700;
-    color: #d4aa4f;
+    color: #b48752;
     letter-spacing: 1px;
 }
 
@@ -46,8 +47,8 @@ body {
 
 #welcomeText {
     font-size: 14px;
-    color: #6a5632;
-    background-color: #fff1c7;
+    color: #78644d;
+    background-color: #efe4d1;
     padding: 7px 14px;
     border-radius: 999px;
 }
@@ -62,40 +63,45 @@ body {
     transition: 0.2s;
 }
 
+/* 按钮颜色对齐 index.css */
 #loginBtn {
-    background-color: #d4aa4f;
+    background-color: #c9ab83;
     color: #fffaf0;
 }
 
 #loginBtn:hover {
-    background-color: #b98d35;
+    background-color: #b59368;
     transform: translateY(-1px);
 }
 
 #logoutBtn {
-    background-color: #ead99f;
-    color: #5f4a21;
+    background-color: #b99862;
+    color: white;
 }
 
 #logoutBtn:hover {
-    background-color: #d8bd6c;
+    background-color: #9f7f4e;
     transform: translateY(-1px);
 }
 
-/* 主体布局 */
+/* 主体布局 - 修复关键点：去掉之前的限制宽度，改为和 index.css 一模一样的 100% 宽度 */
 .main {
     display: flex;
     min-height: calc(100vh - 76px);
-    max-width: 1480px;
-    margin: 0 auto;
+    width: 100%;
 }
 
-/* 左侧栏 */
+/* 左侧栏 - 颜色和定位对齐 index.css */
 .sidebar {
     width: 240px;
-    background-color: rgba(255, 250, 240, 0.82);
+    background-color: #fff8ed;
     padding: 34px 22px;
-    border-right: 1px solid #dfca8e;
+    border-right: 1px solid #e6d7bf;
+    /* 侧边栏固定不动 */
+    position: sticky;
+    top: 76px;
+    height: calc(100vh - 76px);
+    align-self: flex-start;
 }
 
 .sidebar ul {
@@ -113,14 +119,15 @@ body {
 }
 
 .sidebar li:hover {
-    background-color: #fff1c7;
-    color: #8a681f;
+    background-color: #f0dfc4;
+    color: #93673a;
 }
 
 .sidebar li.active {
-    background-color: #d4aa4f;
-    color: #fffaf0;
+    background-color: #c9a66b;
+    color: white;
     font-weight: 700;
+    box-shadow: 0 6px 14px rgba(140, 105, 60, 0.2);
 }
 
 /* 右侧内容 */
@@ -129,17 +136,18 @@ body {
     padding: 42px 44px;
 }
 
+/* 头部块 - 对齐 index.css 的块级样式 */
 .content-header {
     margin-bottom: 28px;
-    background-color: rgba(255, 250, 240, 0.56);
-    border: 1px solid rgba(223, 202, 142, 0.55);
+    background-color: rgba(255, 248, 237, 0.82);
+    border: 1px solid #eadcc7;
     border-radius: 22px;
     padding: 24px 28px;
 }
 
 .content-header h1 {
     font-size: 34px;
-    color: #7f5f23;
+    color: #74542e;
     margin-bottom: 8px;
 }
 
@@ -149,8 +157,8 @@ body {
 }
 
 .apply-section {
-    background-color: rgba(255, 250, 240, 0.45);
-    border: 1px solid rgba(223, 202, 142, 0.42);
+    background-color: rgba(255, 248, 237, 0.82);
+    border: 1px solid #eadcc7;
     border-radius: 22px;
     padding: 24px;
 }
@@ -165,64 +173,52 @@ body {
 .section-title-row h2,
 .apply-section h2 {
     font-size: 24px;
-    color: #7f5f23;
+    color: #74542e;
 }
 
 #applyCountText {
     font-size: 14px;
-    color: #7d6a43;
-    background-color: #fff1c7;
+    color: #78644d;
+    background-color: #efe4d1;
     padding: 6px 12px;
     border-radius: 999px;
 }
 
+/* 恢复最初的申请列表结构 */
 .apply-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
     gap: 20px;
 }
 
-/* 申请卡片 */
+/* 申请卡片 - 结构还原，阴影和边框对齐 index.css */
 .apply-card {
     min-height: 285px;
-    background-color: #fffaf0;
-    border: 1px solid #e4cf91;
+    background-color: #fffaf2;
+    border: 1px solid #eadcc7;
     border-radius: 20px;
     padding: 18px;
-    box-shadow: 0 8px 22px rgba(120, 92, 36, 0.12);
+    box-shadow: 0 8px 20px rgba(150, 120, 80, 0.12);
     transition: 0.25s;
     overflow: hidden;
 }
 
 .apply-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 12px 28px rgba(120, 92, 36, 0.2);
+    box-shadow: 0 12px 26px rgba(150, 120, 80, 0.18);
 }
 
-.apply-card.pending {
-    border-left: 6px solid #d4aa4f;
-}
-
-.apply-card.accepted {
-    border-left: 6px solid #9fbf7a;
-}
-
-.apply-card.rejected {
-    border-left: 6px solid #d89b88;
-}
-
-.apply-card.discard {
-    border-left: 6px solid #b7a6d8;
-}
-
-.apply-card.finished {
-    border-left: 6px solid #9bbbd3;
-}
+/* 卡片侧边颜色 - 保持色彩区分，但调配成柔和的莫兰迪色以和谐融入奶黄背景 */
+.apply-card.pending { border-left: 6px solid #c9a66b; } /* 待处理：主题焦糖色 */
+.apply-card.accepted { border-left: 6px solid #9ab57c; } /* 已通过：柔和浅绿 */
+.apply-card.rejected { border-left: 6px solid #cf8e7c; } /* 已拒绝：柔和砖红 */
+.apply-card.discard { border-left: 6px solid #a89bc6; } /* 已取消：柔和灰紫 */
+.apply-card.finished { border-left: 6px solid #8caecc; } /* 已完成：柔和灰蓝 */
 
 .apply-card h3 {
     height: 30px;
     font-size: 20px;
-    color: #7f5f23;
+    color: #74542e;
     margin-bottom: 12px;
     overflow: hidden;
     white-space: nowrap;
@@ -241,6 +237,7 @@ body {
     color: #5a4a3c;
 }
 
+/* 状态标签样式 */
 .status-badge {
     display: inline-block;
     padding: 5px 12px;
@@ -250,40 +247,23 @@ body {
     margin-bottom: 12px;
 }
 
-.status-pending {
-    background-color: #fff1c7;
-    color: #8a681f;
-}
+/* 状态标签颜色 - 与侧边栏颜色对应，采用极淡的背景色 */
+.status-pending { background-color: #f6efe3; color: #ad8952; }
+.status-accepted { background-color: #eaf1e3; color: #6a824e; }
+.status-rejected { background-color: #f7e6e1; color: #a3614e; }
+.status-discard { background-color: #eae5f2; color: #746394; }
+.status-finished { background-color: #e5edf5; color: #567691; }
 
-.status-accepted {
-    background-color: #e5efd7;
-    color: #5f7d35;
-}
-
-.status-rejected {
-    background-color: #f5ded7;
-    color: #a65f4e;
-}
-
-.status-discard {
-    background-color: #e7def2;
-    color: #70599a;
-}
-
-.status-finished {
-    background-color: #dce9f1;
-    color: #527c9a;
-}
-
+/* 页面空状态提示框 */
 .empty-box {
     grid-column: 1 / -1;
-    background-color: #fffaf0;
-    border: 1px solid #e4cf91;
+    background-color: #fffaf2;
+    border: 1px solid #eadcc7;
     border-radius: 20px;
     padding: 36px;
     text-align: center;
     color: #7d6a43;
-    box-shadow: 0 8px 22px rgba(120, 92, 36, 0.12);
+    box-shadow: 0 8px 20px rgba(150, 120, 80, 0.12);
 }
 
 .empty-text,
@@ -293,6 +273,7 @@ body {
     padding: 18px 0;
 }
 
+/* 响应式调整 */
 @media (max-width: 900px) {
     .topbar {
         height: auto;
@@ -308,7 +289,9 @@ body {
     .sidebar {
         width: 100%;
         border-right: none;
-        border-bottom: 1px solid #dfca8e;
+        border-bottom: 1px solid #e6d7bf;
+        position: static;
+        height: auto;
     }
 
     .sidebar ul {

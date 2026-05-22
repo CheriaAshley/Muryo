@@ -6,22 +6,24 @@
 
 body {
     font-family: 'Nunito', 'Microsoft YaHei', sans-serif;
+    /* 严格对齐 index.css 的全局背景渐变 */
     background: linear-gradient(135deg, #f6efe3, #e8dbc5);
     color: #5e4d3d;
+    min-height: 100vh;
 }
 
 .page {
     min-height: 100vh;
 }
 
-/* 顶部栏 */
+/* ---------------- 顶部栏 ---------------- */
 .topbar {
-    height: 72px;
+    height: 76px;
     background-color: #fffaf1;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 34px;
+    padding: 0 36px;
     box-shadow: 0 4px 18px rgba(150, 120, 80, 0.12);
     position: sticky;
     top: 0;
@@ -29,12 +31,14 @@ body {
 }
 
 .logo {
-    font-size: 28px;
+    font-size: 30px;
     font-weight: 700;
     color: #b48752;
+    letter-spacing: 1px;
     cursor: pointer;
 }
 
+/* 右上角用户区 */
 .user-actions {
     display: flex;
     align-items: center;
@@ -46,73 +50,55 @@ body {
     font-size: 14px;
     color: #78644d;
     background-color: #efe4d1;
-    padding: 6px 12px;
+    padding: 7px 14px;
     border-radius: 999px;
 }
 
 .user-actions button {
-    padding: 7px 16px;
+    padding: 8px 16px;
     border-radius: 999px;
     border: none;
     font-size: 14px;
     cursor: pointer;
-    transition: all 0.2s ease;
     font-family: 'Nunito', 'Microsoft YaHei', sans-serif;
+    transition: 0.2s;
 }
 
-#loginBtn {
-    background-color: #c9ab83;
-    color: white;
-}
+#loginBtn { background-color: #c9ab83; color: #fffaf0; }
+#loginBtn:hover { background-color: #b59368; transform: translateY(-1px); }
+#logoutBtn { background-color: #b99862; color: white; }
+#logoutBtn:hover { background-color: #9f7f4e; transform: translateY(-1px); }
 
-#loginBtn:hover {
-    background-color: #b59368;
-    transform: translateY(-1px);
-}
-
-#logoutBtn {
-    background-color: #b99862;
-    color: white;
-}
-
-#logoutBtn:hover {
-    background-color: #9f7f4e;
-    transform: translateY(-1px);
-}
-
-/* 主布局 */
+/* ---------------- 主体与侧边栏 ---------------- */
 .main {
     display: flex;
-    min-height: calc(100vh - 72px);
+    min-height: calc(100vh - 76px);
+    width: 100%;
 }
 
-/* 左侧栏 */
 .sidebar {
-    width: 230px;
+    width: 240px;
     background-color: #fff8ed;
-    padding: 30px 18px;
+    padding: 34px 22px;
     border-right: 1px solid #e6d7bf;
+    /* 侧边栏固定不动 */
+    position: sticky;
+    top: 76px;
+    height: calc(100vh - 76px);
+    align-self: flex-start;
 }
 
-.sidebar ul {
-    list-style: none;
-}
-
+.sidebar ul { list-style: none; }
 .sidebar li {
-    padding: 15px 18px;
-    margin-bottom: 12px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
     border-radius: 16px;
     cursor: pointer;
-    font-size: 16px;
-    color: #6a5947;
-    transition: 0.25s;
+    font-size: 17px;
+    color: #6b5a4a;
+    transition: 0.2s;
 }
-
-.sidebar li:hover {
-    background-color: #f0dfc4;
-    color: #93673a;
-}
-
+.sidebar li:hover { background-color: #f0dfc4; color: #93673a; }
 .sidebar li.active {
     background-color: #c9a66b;
     color: white;
@@ -120,123 +106,119 @@ body {
     box-shadow: 0 6px 14px rgba(140, 105, 60, 0.2);
 }
 
-/* 内容区 */
+/* ---------------- 右侧内容区 ---------------- */
 .content {
     flex: 1;
-    padding: 30px 38px;
+    padding: 42px 44px;
 }
 
+/* 头部块面板 */
 .content-header {
-    background-color: rgba(255, 248, 237, 0.8);
-    border-radius: 24px;
+    margin-bottom: 28px;
+    background-color: rgba(255, 248, 237, 0.82);
+    border: 1px solid #eadcc7;
+    border-radius: 22px;
     padding: 24px 28px;
-    margin-bottom: 24px;
-    box-shadow: 0 8px 20px rgba(150, 120, 80, 0.1);
 }
 
 .content-header h1 {
-    font-size: 31px;
+    font-size: 34px;
     color: #74542e;
     margin-bottom: 8px;
 }
 
 .content-header p {
-    font-size: 15px;
-    color: #907557;
+    font-size: 16px;
+    color: #7d6a43;
+    margin-bottom: 0;
 }
 
-/* section */
+/* 待办申请外层大框 */
 .apply-section {
-    background-color: rgba(255, 248, 237, 0.6);
-    border-radius: 26px;
-    padding: 26px;
-    box-shadow: 0 8px 20px rgba(150, 120, 80, 0.1);
+    background-color: rgba(255, 248, 237, 0.82);
+    border: 1px solid #eadcc7;
+    border-radius: 22px;
+    padding: 24px;
 }
 
 .section-title-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 22px;
+    margin-bottom: 18px;
 }
 
-.apply-section h2 {
+.section-title-row h2 {
     font-size: 24px;
     color: #74542e;
 }
 
+/* 统计数量标签 */
 #todoCountText {
     font-size: 14px;
+    color: #78644d;
     background-color: #efe4d1;
-    color: #7b664d;
-    padding: 7px 14px;
+    padding: 6px 12px;
     border-radius: 999px;
+    font-weight: 600;
 }
 
-/* 卡片列表 */
+/* 卡片列表排列 */
 .apply-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 22px;
+    grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
+    gap: 20px;
 }
 
-/* 卡片 */
+/* 待办申请卡片 */
 .apply-card {
-    height: 390px;
+    min-height: 285px;
     background-color: #fffaf2;
-    border-radius: 22px;
-    padding: 20px;
+    border: 1px solid #eadcc7;
+    border-radius: 20px;
+    padding: 18px;
     box-shadow: 0 8px 20px rgba(150, 120, 80, 0.12);
-    transition: all 0.25s ease;
-
+    transition: 0.25s;
+    overflow: hidden;
+    
+    /* 引入 Flex 布局，让底部的按钮组始终沉底对齐 */
     display: flex;
     flex-direction: column;
-    overflow: hidden;
 }
 
 .apply-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 12px 26px rgba(150, 120, 80, 0.2);
+    box-shadow: 0 12px 26px rgba(150, 120, 80, 0.18);
 }
 
-.apply-card.pending {
-    border-left: 7px solid #d4b162;
-}
-
-.apply-card.accepted {
-    border-left: 7px solid #9db58b;
-}
+/* 卡片侧边状态线（莫兰迪柔和色系） */
+.apply-card.pending { border-left: 6px solid #c9a66b; } 
+.apply-card.accepted { border-left: 6px solid #9ab57c; } 
+.apply-card.rejected { border-left: 6px solid #cf8e7c; } 
+.apply-card.discard { border-left: 6px solid #a89bc6; } 
+.apply-card.finished { border-left: 6px solid #8caecc; } 
 
 .apply-card h3 {
     font-size: 20px;
-    color: #9b6f3f;
-    margin-bottom: 12px;
-
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    color: #74542e;
+    margin-bottom: 14px;
 }
 
 .apply-card p {
     font-size: 14px;
-    color: #685746;
+    color: #5f503e;
     margin-bottom: 8px;
-    line-height: 1.6;
-
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.55;
 }
 
 .apply-card p span {
     font-weight: 700;
-    color: #4f4132;
+    color: #5a4a3c;
 }
 
-/* 状态标签 */
+/* 状态标签样式 */
 .status-badge {
-    width: fit-content;
-    display: inline-block;
+    align-self: flex-start;
     padding: 5px 12px;
     border-radius: 999px;
     font-size: 13px;
@@ -244,110 +226,71 @@ body {
     margin-bottom: 14px;
 }
 
-.status-pending {
-    background-color: #f5e4b8;
-    color: #916516;
-}
+/* 状态标签背景颜色 */
+.status-pending { background-color: #f6efe3; color: #ad8952; }
+.status-accepted { background-color: #eaf1e3; color: #6a824e; }
+.status-rejected { background-color: #f7e6e1; color: #a3614e; }
+.status-discard { background-color: #eae5f2; color: #746394; }
+.status-finished { background-color: #e5edf5; color: #567691; }
 
-.status-accepted {
-    background-color: #dfead7;
-    color: #577044;
-}
-
-/* 按钮区域 */
-.card-actions {
-    margin-top: auto;
-    padding-top: 16px;
-    display: flex;
-    gap: 10px;
-}
-
-.action-btn {
-    flex: 1;
-    border: none;
-    border-radius: 14px;
-    padding: 10px 0;
-    font-size: 14px;
-    cursor: pointer;
-    transition: 0.2s;
-    font-family: 'Nunito', 'Microsoft YaHei', sans-serif;
-}
-
-.action-btn:hover {
-    transform: translateY(-1px);
-}
-
-.action-btn:active {
-    transform: scale(0.97);
-}
-
-.btn-agree {
-    background-color: #9db58b;
-    color: white;
-}
-
-.btn-agree:hover {
-    background-color: #879f76;
-}
-
-.btn-reject {
-    background-color: #d69b8c;
-    color: white;
-}
-
-.btn-reject:hover {
-    background-color: #be8274;
-}
-
-.btn-complete {
-    background-color: #9eb7ca;
-    color: white;
-}
-
-.btn-complete:hover {
-    background-color: #88a4b8;
-}
-
-/* 空状态 */
-.loading-text,
+/* 页面空状态提示框 */
 .empty-box {
     grid-column: 1 / -1;
     background-color: #fffaf2;
-    border-radius: 22px;
+    border: 1px solid #eadcc7;
+    border-radius: 20px;
     padding: 36px;
     text-align: center;
-    color: #8f7657;
+    color: #7d6a43;
     box-shadow: 0 8px 20px rgba(150, 120, 80, 0.12);
 }
 
-.empty-text {
-    white-space: nowrap;
+.empty-text,
+.loading-text {
+    color: #7d6a43;
+    font-size: 16px;
+    padding: 18px 0;
 }
 
-/* 响应式 */
+/* ---------------- 核心新增：卡片操作按钮组 ---------------- */
+.card-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: auto; /* 这行代码施展魔法，把按钮推到卡片最底部 */
+    padding-top: 16px;
+}
+
+.action-btn {
+    padding: 6px 16px;
+    border: none;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+    color: white;
+}
+
+/* 按钮专属调色盘：和谐融入背景的莫兰迪色系 */
+.btn-agree { background-color: #9ab57c; } /* 柔和浅绿 */
+.btn-agree:hover { background-color: #839d67; transform: translateY(-1px); }
+
+.btn-reject { background-color: #cf8e7c; } /* 柔和砖红 */
+.btn-reject:hover { background-color: #b87b6a; transform: translateY(-1px); }
+
+.btn-complete { background-color: #8caecc; } /* 柔和灰蓝 */
+.btn-complete:hover { background-color: #7999b5; transform: translateY(-1px); }
+
+.btn-cancel { background-color: #a89bc6; } /* 柔和灰紫 */
+.btn-cancel:hover { background-color: #9184ad; transform: translateY(-1px); }
+
+/* ---------------- 响应式 ---------------- */
 @media (max-width: 900px) {
-    .main {
-        flex-direction: column;
-    }
-
-    .sidebar {
-        width: 100%;
-        border-right: none;
-        border-bottom: 1px solid #e6d7bf;
-    }
-
-    .sidebar ul {
-        display: flex;
-        gap: 10px;
-        overflow-x: auto;
-    }
-
-    .sidebar li {
-        white-space: nowrap;
-        margin-bottom: 0;
-    }
-
-    .content {
-        padding: 24px;
-    }
+    .topbar { height: auto; padding: 18px; flex-wrap: wrap; gap: 14px; }
+    .main { flex-direction: column; }
+    .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #e6d7bf; position: static; height: auto; }
+    .sidebar ul { display: flex; flex-wrap: wrap; gap: 10px; }
+    .sidebar li { margin-bottom: 0; }
+    .content { padding: 28px 20px; }
+    .section-title-row { flex-direction: column; align-items: flex-start; gap: 10px;}
 }

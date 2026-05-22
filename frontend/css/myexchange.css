@@ -6,202 +6,186 @@
 
 body {
     font-family: 'Nunito', 'Microsoft YaHei', sans-serif;
-    background: linear-gradient(135deg, #fffaf3, #fdebd2);
-    color: #5a4a3c;
+    background: linear-gradient(135deg, #f6efe3, #e8dbc5);
+    color: #5e4d3d;
+    min-height: 100vh;
 }
 
 .page {
     min-height: 100vh;
 }
 
-/* 顶部栏 */
+/* ---------------- 顶部栏 ---------------- */
 .topbar {
-    height: 70px;
-    background-color: #ffffff;
+    height: 76px;
+    background-color: #fffaf1;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 30px;
-    box-shadow: 0 2px 10px rgba(200, 160, 60, 0.15);
+    padding: 0 36px;
+    box-shadow: 0 4px 18px rgba(150, 120, 80, 0.12);
     position: sticky;
     top: 0;
     z-index: 100;
 }
 
 .logo {
-    font-size: 28px;
+    font-size: 30px;
     font-weight: 700;
-    color: #f6c453;
+    color: #b48752;
+    letter-spacing: 1px;
     cursor: pointer;
 }
 
-/* 右上角用户区 */
 .user-actions {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     margin-left: auto;
 }
 
 #welcomeText {
     font-size: 14px;
-    color: #666;
-    background-color: #f5f7fa;
-    padding: 4px 10px;
-    border-radius: 12px;
+    color: #78644d;
+    background-color: #efe4d1;
+    padding: 7px 14px;
+    border-radius: 999px;
 }
 
 .user-actions button {
-    padding: 6px 14px;
-    border-radius: 20px;
+    padding: 8px 16px;
+    border-radius: 999px;
     border: none;
     font-size: 14px;
     cursor: pointer;
     font-family: 'Nunito', 'Microsoft YaHei', sans-serif;
-    transition: all 0.2s ease;
+    transition: 0.2s;
 }
 
-#loginBtn {
-    background-color: #6ec1ff;
-    color: white;
-}
+#loginBtn { background-color: #c9ab83; color: #fffaf0; }
+#loginBtn:hover { background-color: #b59368; transform: translateY(-1px); }
+#logoutBtn { background-color: #b99862; color: white; }
+#logoutBtn:hover { background-color: #9f7f4e; transform: translateY(-1px); }
 
-#loginBtn:hover {
-    background-color: #4eaee6;
-    transform: translateY(-1px);
-}
-
-#logoutBtn {
-    background-color: #f4da92;
-    color: white;
-}
-
-#logoutBtn:hover {
-    background-color: #cbaf50;
-    transform: translateY(-1px);
-}
-
-.user-actions button:active {
-    transform: scale(0.95);
-}
-
-/* 主体布局 */
+/* ---------------- 主体与侧边栏 ---------------- */
 .main {
     display: flex;
-    min-height: calc(100vh - 70px);
+    min-height: calc(100vh - 76px);
+    width: 100%;
 }
 
-/* 左侧栏 */
 .sidebar {
-    width: 220px;
-    background-color: #fffdf8;
-    padding: 30px 20px;
-    border-right: 1px solid #f2e2c4;
+    width: 240px;
+    background-color: #fff8ed;
+    padding: 34px 22px;
+    border-right: 1px solid #e6d7bf;
+    position: sticky;
+    top: 76px;
+    height: calc(100vh - 76px);
+    align-self: flex-start;
 }
 
-.sidebar ul {
-    list-style: none;
-}
-
+.sidebar ul { list-style: none; }
 .sidebar li {
-    padding: 14px 16px;
-    margin-bottom: 12px;
-    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+    border-radius: 16px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 17px;
     color: #6b5a4a;
-    transition: 0.3s;
+    transition: 0.2s;
 }
-
-.sidebar li:hover {
-    background-color: #fff3da;
-    color: #d89c2b;
-}
-
+.sidebar li:hover { background-color: #f0dfc4; color: #93673a; }
 .sidebar li.active {
-    background-color: #f6c453;
+    background-color: #c9a66b;
     color: white;
     font-weight: 700;
+    box-shadow: 0 6px 14px rgba(140, 105, 60, 0.2);
 }
 
-/* 右侧内容 */
+/* ---------------- 右侧内容区 ---------------- */
 .content {
     flex: 1;
-    padding: 30px;
+    padding: 42px 44px;
 }
 
+/* 头部块面板 (已修改为左右布局，用来容纳"共n条申请") */
 .content-header {
-    margin-bottom: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    background-color: rgba(255, 248, 237, 0.82);
+    border: 1px solid #eadcc7;
+    border-radius: 22px;
+    padding: 24px 28px;
 }
 
-.content-header h1 {
-    font-size: 30px;
-    color: #7a5c2e;
-    margin-bottom: 8px;
+.header-info h1 { 
+    font-size: 34px; 
+    color: #74542e; 
+    margin-bottom: 8px; 
+}
+.header-info p { 
+    font-size: 16px; 
+    color: #7d6a43; 
+    margin-bottom: 0; 
 }
 
-.content-header p {
+/* 申请数量标签样式 */
+#tradeCountText {
     font-size: 15px;
-    color: #9a7c52;
-    margin-bottom: 0;
+    color: #78644d;
+    background-color: #efe4d1;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-weight: 600;
 }
 
-.trade-section h2 {
-    font-size: 24px;
-    color: #7a5c2e;
-    margin-bottom: 18px;
-}
-
+/* 交换卡片列表排列 */
 .trade-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
     gap: 20px;
 }
 
+/* 交换卡片 (去掉了图片，高度压缩到 160px) */
 .trade-card {
-    background-color: #ffffff;
-    border-radius: 18px;
-    padding: 20px;
-    box-shadow: 0 6px 18px rgba(200, 160, 60, 0.12);
-    transition: transform 0.25s, box-shadow 0.25s;
+    min-height: 160px;
+    background-color: #fffaf2;
+    border: 1px solid #eadcc7;
+    border-radius: 20px;
+    padding: 22px 20px;
+    box-shadow: 0 8px 20px rgba(150, 120, 80, 0.12);
+    transition: 0.25s;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .trade-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 24px rgba(200, 160, 60, 0.2);
+    box-shadow: 0 12px 26px rgba(150, 120, 80, 0.18);
 }
 
-.trade-card.pending {
-    border-left: 6px solid #f6c453;
-}
-
-.trade-card.accepted {
-    border-left: 6px solid #7cc576;
-}
-
-.trade-card.rejected {
-    border-left: 6px solid #f08a8a;
-}
-
-.trade-card.discard {
-    border-left: 6px solid #aea2ffc5;
-}
-
-.trade-card.finished {
-    border-left: 6px solid #93cdf9c5;
-}
+/* 卡片侧边状态线 */
+.trade-card.pending { border-left: 6px solid #c9a66b; } 
+.trade-card.accepted { border-left: 6px solid #9ab57c; } 
+.trade-card.rejected { border-left: 6px solid #cf8e7c; } 
+.trade-card.discard { border-left: 6px solid #a89bc6; } 
+.trade-card.finished { border-left: 6px solid #8caecc; } 
 
 .trade-card h3 {
     font-size: 20px;
-    color: #d89c2b;
+    color: #74542e;
     margin-bottom: 14px;
 }
 
 .trade-card p {
     font-size: 14px;
-    color: #6b5a4a;
+    color: #5f503e;
     margin-bottom: 8px;
-    line-height: 1.7;
+    line-height: 1.55;
 }
 
 .trade-card p span {
@@ -209,50 +193,49 @@ body {
     color: #5a4a3c;
 }
 
+/* 状态标签样式 */
 .status-badge {
-    display: inline-block;
-    padding: 4px 10px;
+    align-self: flex-start;
+    padding: 5px 12px;
     border-radius: 999px;
     font-size: 13px;
     font-weight: 700;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
 }
 
-.status-pending {
-    background-color: #fff3cd;
-    color: #b78103;
-}
+/* 状态标签背景颜色 */
+.status-pending { background-color: #f6efe3; color: #ad8952; }
+.status-accepted { background-color: #eaf1e3; color: #6a824e; }
+.status-rejected { background-color: #f7e6e1; color: #a3614e; }
+.status-discard { background-color: #eae5f2; color: #746394; }
+.status-finished { background-color: #e5edf5; color: #567691; }
 
-.status-accepted {
-    background-color: #dff5df;
-    color: #2e7d32;
-}
-
-.status-rejected {
-    background-color: #fde2e2;
-    color: #c0392b;
-}
-
-.status-discard {
-    background-color: #cdbdf2;
-    color: #7243f5;
-}
-
-.status-finished {
-    background-color: #a5bcf4;
-    color: #4399f5;
-}
-
+/* 页面空状态提示框 */
 .empty-box {
     grid-column: 1 / -1;
-    background-color: #ffffff;
-    border-radius: 18px;
-    padding: 30px;
+    background-color: #fffaf2;
+    border: 1px solid #eadcc7;
+    border-radius: 20px;
+    padding: 36px;
     text-align: center;
-    color: #9a7c52;
-    box-shadow: 0 6px 18px rgba(200, 160, 60, 0.12);
+    color: #7d6a43;
+    box-shadow: 0 8px 20px rgba(150, 120, 80, 0.12);
 }
 
-.empty-text {
-    white-space: nowrap;
+.empty-text,
+.loading-text {
+    color: #7d6a43;
+    font-size: 16px;
+    padding: 18px 0;
+}
+
+/* ---------------- 响应式 ---------------- */
+@media (max-width: 900px) {
+    .topbar { height: auto; padding: 18px; flex-wrap: wrap; gap: 14px; }
+    .main { flex-direction: column; }
+    .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #e6d7bf; position: static; height: auto; }
+    .sidebar ul { display: flex; flex-wrap: wrap; gap: 10px; }
+    .sidebar li { margin-bottom: 0; }
+    .content { padding: 28px 20px; }
+    .content-header { flex-direction: column; align-items: flex-start; gap: 12px;}
 }
