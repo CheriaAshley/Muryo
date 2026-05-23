@@ -10,10 +10,8 @@
 <body>
 
 <div class="page">
-
     <header class="topbar">
         <div class="logo">Muryo ~</div>
-
         <div class="user-actions">
             <span id="welcomeText"></span>
             <button id="loginBtn" onclick="goLogin()">登录</button>
@@ -22,7 +20,6 @@
     </header>
 
     <div class="main">
-
         <aside class="sidebar">
             <ul>
                 <li onclick="goHome()">首页</li>
@@ -40,7 +37,6 @@
                     <h1>我的主页</h1>
                     <p>查看个人信息和我发布的制品</p>
                 </div>
-
                 <button class="publish-btn" onclick="openPublishModal()">发布制品</button>
             </div>
 
@@ -54,46 +50,68 @@
                     <h2>我的制品</h2>
                     <span id="myItemCountText">正在统计...</span>
                 </div>
-
                 <div class="item-list" id="myItemList">
                     <p class="loading-text">正在加载我的制品...</p>
                 </div>
             </div>
-        </section>
 
+            <div class="my-items-section" style="margin-top: 42px;">
+                <div class="section-title-row">
+                    <h2>我的收藏</h2>
+                    <span id="myCollectionCountText">正在统计...</span>
+                </div>
+                <div class="item-list" id="myCollectionList">
+                    <p class="loading-text">正在加载我的收藏...</p>
+                </div>
+            </div>
+        </section>
     </div>
 </div>
 
-<!-- 发布制品弹窗 -->
 <div class="modal-mask" id="publishModal">
     <div class="modal-box">
         <div class="modal-header">
             <h2>发布制品</h2>
             <span class="close-btn" onclick="closePublishModal()">×</span>
         </div>
-
         <form id="publishForm" onsubmit="publishItem(); return false;">
             <label>制品名称</label>
             <input type="text" id="itemName" required>
-
+            
             <label>角色</label>
             <input type="text" id="role" placeholder="例如：阿米娅、初音未来、汤汤">
-
+            
             <label>类型</label>
             <input type="text" id="type" placeholder="例如：吧唧、色纸、立牌">
-
+            
             <label>数量</label>
             <input type="number" id="quantity" min="1" required>
-
-            <label>上传制品图片</label>
-
-            <input type="file" id="itemImage" accept="image/*">
-            <p id="selectedImageName" class="upload-tip"></p>
-
+            
+            <label>制品图片链接 (URL/相对路径)</label>
+            <input type="text" id="itemImage" placeholder="例如：upload/my_item.png 或 http://...">
+            
             <label>介绍</label>
             <textarea id="intro" rows="4" placeholder="简单介绍一下这个制品吧~"></textarea>
+            
+            <button type="submit" class="submit-btn" id="publishBtn">确认发布</button>
+        </form>
+    </div>
+</div>
 
-             <button type="submit" class="submit-btn" id="publishBtn">确认发布</button>
+<div class="modal-mask" id="applyModal">
+    <div class="modal-box" style="width: 400px;">
+        <div class="modal-header">
+            <h2>申请交换</h2>
+            <span class="close-btn" onclick="closeApplyModal()">×</span>
+        </div>
+        <div style="margin-bottom: 20px; color: #74542e; font-size: 15px; line-height: 1.5;">
+            你正在向 <strong><span id="applyOwnerName"></span></strong> 申请交换：<br>
+            <strong style="color: #b48752; font-size: 18px;" id="applyItemName"></strong>
+        </div>
+        <form onsubmit="submitApply(); return false;">
+            <label>申请数量 (当前余量: <span id="applyMaxQty">0</span>)</label>
+            <input type="number" id="applyQuantity" min="1" required>
+            <button type="submit" class="submit-btn" id="submitApplyBtn" style="margin-top: 24px;">发送申请</button>
         </form>
     </div>
 </div>

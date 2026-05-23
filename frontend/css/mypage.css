@@ -270,3 +270,34 @@ body {
     .content-header { flex-direction: column; align-items: flex-start; gap: 16px; }
     .modal-box { width: 90%; }
 }
+/* --- 卡片内操作按钮（删除制品、取消收藏） --- */
+.delete-item-btn, .cancel-fav-btn {
+    width: 100%;
+    margin-top: 12px;
+    padding: 8px 0;
+    border: none;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+    color: white;
+}
+
+/* 删除制品：柔和砖红 */
+.delete-item-btn {
+    background-color: #cf8e7c; 
+}
+.delete-item-btn:hover {
+    background-color: #b87b6a;
+    transform: translateY(-1px);
+}
+
+/* 取消收藏：柔和灰紫 */
+.cancel-fav-btn {
+    background-color: #a89bc6; 
+}
+.cancel-fav-btn:hover {
+    background-color: #9184ad;
+    transform: translateY(-1px);
+}

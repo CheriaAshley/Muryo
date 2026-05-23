@@ -2522,12 +2522,12 @@ int main() {
             return;
         }
 
-        if (level == 3) {
+        if (level >= 2) {
             string sql = "UPDATE item SET status = 2 WHERE item_id = " + to_string(item_id);
 
             if (mysql_query(conn, sql.c_str())) {
                 response_json["success"] = false;
-                response_json["message"] = "三级管理员直接封禁失败";
+                response_json["message"] = "管理员直接封禁失败";
             }
             else if (mysql_affected_rows(conn) == 0) {
                 response_json["success"] = false;
@@ -2535,7 +2535,7 @@ int main() {
             }
             else {
                 response_json["success"] = true;
-                response_json["message"] = "三级管理员已直接封禁制品";
+                response_json["message"] = "管理员已直接封禁制品";
             }
 
             mysql_close(conn);
@@ -3042,15 +3042,21 @@ int main() {
             return;
         }
 
+        // 修改后的后端逻辑
         if (apply_type != "ban_item" && apply_type != "ban_user") {
-            mysql_query(conn, "ROLLBACK");
-            mysql_close(conn);
-
-            response_json["success"] = false;
-            response_json["message"] = "未知申请类型";
-
-            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
-            return;
+            // 如果是拒绝操作，且类型未知，则允许进入处理逻辑（直接去更新状态为已拒绝）
+            if (action == "reject") {
+                // 允许继续，直接执行下面的更新 SQL
+            }
+            else {
+                // 如果是未知类型且想点同意，则拦截
+                mysql_query(conn, "ROLLBACK");
+                mysql_close(conn);
+                response_json["success"] = false;
+                response_json["message"] = "未知申请类型，无法进行同意操作";
+                res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+                return;
+            }
         }
 
         if (action == "agree") {
