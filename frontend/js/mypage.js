@@ -5,7 +5,7 @@ window.onload = function () {
     updateAdminEntry();
     loadProfile();
     loadMyItems();
-    loadMyCollections(); // 新增：加载收藏
+    loadMyCollections(); 
 };
 
 function loadProfile() {
@@ -20,18 +20,65 @@ function loadProfile() {
                 return;
             }
             const profile = data.data;
+            window.currentUser = profile;
+            
             profileCard.innerHTML = `
             <h2>个人信息</h2>
-            <p><strong>用户ID：</strong>${profile.user_id}</p>
-            <p><strong>用户名：</strong>${profile.user_name || "暂无"}</p>
-            <p><strong>联系方式：</strong>${profile.contact || "暂无"}</p>
-            <p><strong>个人介绍：</strong>${profile.introduction || profile.intro || "这个人很神秘，还没有留下介绍~"}</p>
+            <div class="profile-details">
+                <p><strong>用户ID：</strong>${profile.user_id}</p>
+                <p><strong>用户名：</strong>${profile.user_name || "暂无"}</p>
+                <p><strong>联系方式：</strong>${profile.contact || "暂无"}</p>
+                <p><strong>个人介绍：</strong>${profile.introduction || profile.intro || "这个人很神秘，还没有留下介绍~"}</p>
+            </div>
+            <button class="edit-btn" onclick="openEditModal()">修改个人信息</button>
         `;
         })
         .catch(error => {
             console.error("加载个人信息失败:", error);
             profileCard.innerHTML = `<h2>个人信息</h2><p>加载失败，请检查后端是否启动</p>`;
         });
+}
+
+function openEditModal() {
+    const modal = document.getElementById("editProfileModal");
+    modal.style.display = "flex";
+    if (window.currentUser) {
+        document.getElementById("editUserName").value = window.currentUser.user_name || "";
+        document.getElementById("editContact").value = window.currentUser.contact || "";
+        document.getElementById("editIntro").value = window.currentUser.introduction || window.currentUser.intro || "";
+    }
+}
+
+function closeEditModal() {
+    document.getElementById("editProfileModal").style.display = "none";
+}
+
+async function saveProfile() {
+    const user = getCurrentUser(); 
+    const params = new URLSearchParams();
+    
+    params.append("user_id", user.user_id);
+    params.append("user_name", document.getElementById("editUserName").value);
+    params.append("contact", document.getElementById("editContact").value);
+    params.append("intro", document.getElementById("editIntro").value);
+    params.append("password", document.getElementById("editPassword").value);
+
+    try {
+        const response = await fetch("http://127.0.0.1:8080/user/update", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: params.toString()
+        });
+        const data = await response.json();
+        if (data.success) {
+            alert("更新成功！");
+            location.reload(); 
+        } else {
+            alert("更新失败: " + data.message);
+        }
+    } catch (e) {
+        alert("服务器好像开小差了，请稍后再试~");
+    }
 }
 
 function loadMyItems() {
@@ -91,7 +138,6 @@ function loadMyItems() {
         });
 }
 
-// --- 加载我的收藏 ---
 function loadMyCollections() {
     const user = getCurrentUser();
     const collectionList = document.getElementById("myCollectionList");
@@ -138,7 +184,6 @@ function loadMyCollections() {
                     </div>
                 `;
 
-                // 点击收藏的卡片直接唤起申请弹窗
                 card.onclick = function () {
                     openApplyModal(item.item_id, item.owner, item.owner_name, item.item_name, item.quantity);
                 };
@@ -152,7 +197,6 @@ function loadMyCollections() {
         });
 }
 
-// --- 发布制品相关 ---
 function openPublishModal() {
     document.getElementById("publishModal").style.display = "flex";
 }
@@ -162,7 +206,6 @@ function closePublishModal() {
     document.getElementById("publishForm").reset();
 }
 
-// --- 发布制品相关 ---
 function publishItem() {
     const user = getCurrentUser();
     if (!user || !user.user_id) {
@@ -174,7 +217,6 @@ function publishItem() {
     const role = document.getElementById("role").value.trim();
     const type = document.getElementById("type").value.trim();
     const quantity = document.getElementById("quantity").value.trim();
-    // 新增：获取图片路径输入框的值
     const imgUrl = document.getElementById("itemImage").value.trim(); 
     const intro = document.getElementById("intro").value.trim();
     const publishBtn = document.getElementById("publishBtn");
@@ -199,7 +241,6 @@ function publishItem() {
     params.append("role", role);
     params.append("type", type);
     params.append("quantity", quantity);
-    // 新增：把图片路径参数传给后端
     params.append("img_url", imgUrl); 
     params.append("intro", intro);
 
@@ -213,7 +254,7 @@ function publishItem() {
         alert(data.message || "发布完成");
         if (data.success) {
             closePublishModal();
-            loadMyItems(); // 刷新我的制品列表
+            loadMyItems(); 
         }
     })
     .catch(error => {
@@ -262,7 +303,6 @@ function deleteItem(event, itemId) {
     });
 }
 
-// --- 新增：申请交换逻辑 ---
 let currentApplyItem = null;
 
 function openApplyModal(itemId, ownerId, ownerName, itemName, maxQuantity) {
@@ -306,10 +346,10 @@ function submitApply() {
     }
 
     const params = new URLSearchParams();
-    params.append("ufrom", currentApplyItem.owner);      // ufrom: 物品的主人 (你C++里的验证逻辑: owner != ufrom)
-    params.append("uto", user.user_id);                  // uto: 发起申请的人 (当前登录的你)
-    params.append("item_ids", currentApplyItem.item_id); // 要交换的制品ID
-    params.append("quantities", quantity);               // 申请的数量
+    params.append("ufrom", currentApplyItem.owner); 
+    params.append("uto", user.user_id); 
+    params.append("item_ids", currentApplyItem.item_id);
+    params.append("quantities", quantity); 
 
     fetch("http://127.0.0.1:8080/exchange/apply", {
         method: "POST",
@@ -321,7 +361,6 @@ function submitApply() {
         alert(data.message || "申请结果返回");
         if (data.success) {
             closeApplyModal();
-            // 申请成功后刷新收藏列表，获取最新的制品余量
             loadMyCollections(); 
         }
     })
@@ -337,9 +376,7 @@ function submitApply() {
     });
 }
 
-// --- 新增：取消收藏逻辑 ---
 function removeFavorite(event, itemId) {
-    // 关键魔法：阻止事件冒泡！这样点击按钮时，就不会触发卡片本身的 onclick（申请弹窗）了
     event.stopPropagation(); 
 
     const user = getCurrentUser();
@@ -365,7 +402,6 @@ function removeFavorite(event, itemId) {
     .then(data => {
         alert(data.message || "操作完成");
         if (data.success) {
-            // 取消成功后，重新加载收藏列表刷新页面
             loadMyCollections();
         }
     })

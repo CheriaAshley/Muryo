@@ -98,6 +98,30 @@
     </div>
 </div>
 
+<div class="modal-mask" id="editProfileModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2>编辑个人资料</h2>
+            <span class="close-btn" onclick="closeEditModal()">×</span>
+        </div>
+        <form onsubmit="saveProfile(); return false;">
+            <label>用户名</label>
+            <input type="text" id="editUserName" required>
+            
+            <label>联系方式</label>
+            <input type="text" id="editContact" placeholder="填写邮箱或手机号">
+            
+            <label>个人简介</label>
+            <textarea id="editIntro" rows="3" placeholder="介绍一下自己吧~"></textarea>
+            
+            <label>修改密码 (留空则不修改)</label>
+            <input type="password" id="editPassword" placeholder="******">
+            
+            <button type="submit" class="submit-btn">保存修改</button>
+        </form>
+    </div>
+</div>
+
 <div class="modal-mask" id="applyModal">
     <div class="modal-box" style="width: 400px;">
         <div class="modal-header">

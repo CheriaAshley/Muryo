@@ -314,3 +314,21 @@ body {
         gap: 10px;
     }
 }
+.card-actions {
+    margin-top: 10px;
+    text-align: right;
+}
+
+.btn-cancel {
+    background-color: #ff6b6b;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.btn-cancel:hover {
+    background-color: #ff4757;
+}

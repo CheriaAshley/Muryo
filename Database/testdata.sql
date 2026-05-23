@@ -2,13 +2,14 @@
  * 该SQL脚本用于初始化测试数据，覆盖了用户、管理员、制品、交换申请等多个表。
  * 包含正常数据和边界情况的数据，以便进行全面的功能测试。
  * 注意：执行该脚本会清空相关表中的旧数据，并重置自增ID，请确保在测试环境中使用。
- * 该脚本可能存在缺陷，例如未考虑某些边界情况或数据一致性问题，测试过程中请注意观察并记录任何异常情况，以便后续修正。
+ * 该脚本*极大*可能存在缺陷，例如未考虑某些边界情况或数据一致性问题，测试过程中请注意观察并记录任何异常情况，以便后续修正。
  */
 USE muryo;
 
 -- 清空旧测试数据
 SET FOREIGN_KEY_CHECKS = 0;
 
+DELETE FROM favorite;
 DELETE FROM exdetail;
 DELETE FROM exchange;
 DELETE FROM admin_apply;
@@ -25,6 +26,7 @@ ALTER TABLE user AUTO_INCREMENT = 1;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
+-- 项目sql本身已经有用户1了，测试代码会清空数据所以重新插入
 INSERT INTO user(user_id, user_name, password)
 VALUES (1, 'system', '123456')
 ON DUPLICATE KEY UPDATE

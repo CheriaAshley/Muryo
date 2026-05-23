@@ -144,6 +144,7 @@ body {
 
 /* 个人信息卡片 - 使用 index.css 卡片色盘 */
 .profile-card {
+    position: relative; /* 确保内部的修改按钮可以正确定位 */
     background-color: #fffaf2;
     border: 1px solid #eadcc7;
     border-radius: 22px;
@@ -153,6 +154,24 @@ body {
 }
 .profile-card h2 { font-size: 24px; color: #74542e; margin-bottom: 16px; }
 .profile-card p { color: #5f503e; line-height: 1.8; font-size: 15px; }
+
+/* 修改个人信息按钮 */
+.edit-btn {
+    background-color: #b48752;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 15px;
+    transition: all 0.2s ease;
+}
+.edit-btn:hover {
+    background-color: #74542e;
+    transform: translateY(-1px);
+}
 
 /* 制品区块 */
 .section-title-row {
@@ -164,7 +183,7 @@ body {
 .section-title-row h2 { font-size: 24px; color: #74542e; }
 
 /* 数量文本 - 匹配 index.css 的 item-count-text */
-#myItemCountText {
+#myItemCountText, #myCollectionCountText {
     margin-top: 8px;
     font-size: 14px;
     color: #8a743f;
@@ -220,56 +239,120 @@ body {
 
 .loading-text, .empty-text { color: #7d6a43; font-size: 16px; padding: 18px 0; }
 
-/* 发布弹窗 - 使用 index.css 搜索框的色号方案作为输入框基础 */
+
+/* =========================================
+   弹窗 (Modal) 与 表单通用样式
+   ========================================= */
+
+/* 遮罩层 */
 .modal-mask {
-    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background-color: rgba(94, 77, 61, 0.4); z-index: 999;
-    justify-content: center; align-items: center; backdrop-filter: blur(3px);
+    display: none; 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100vw; 
+    height: 100vh;
+    background-color: rgba(94, 77, 61, 0.4); 
+    z-index: 1000;
+    justify-content: center; 
+    align-items: center; 
+    backdrop-filter: blur(3px);
 }
 
+/* 弹窗盒子 */
 .modal-box {
-    background-color: #fffaf2; width: 480px; border-radius: 22px; padding: 32px;
-    box-shadow: 0 12px 26px rgba(150, 120, 80, 0.18); border: 1px solid #eadcc7;
+    background-color: #fffaf2; 
+    width: 480px; 
+    max-width: 90%;
+    border-radius: 24px; 
+    padding: 32px 36px;
+    box-shadow: 0 15px 35px rgba(100, 75, 50, 0.15); 
+    border: 1px solid #eadcc7;
+    animation: modalFadeIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* 弹窗动画 */
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
 .modal-header h2 { color: #74542e; font-size: 22px; }
 
-.close-btn { cursor: pointer; font-size: 28px; color: #ad8952; transition: 0.2s; }
-.close-btn:hover { color: #74542e; }
+.close-btn { cursor: pointer; font-size: 28px; color: #bfa78a; transition: 0.2s; line-height: 1; }
+.close-btn:hover { color: #cf8e7c; }
 
-#publishForm label {
-    display: block; color: #74542e; margin-top: 16px;
-    font-weight: 700; font-size: 14px; margin-bottom: 6px;
+/* 通用表单 Label 样式 */
+.modal-box form label {
+    display: block; 
+    color: #7d6a43; 
+    margin-top: 16px;
+    font-weight: 700; 
+    font-size: 14px; 
+    margin-bottom: 8px;
+}
+.modal-box form label:first-of-type { margin-top: 0; }
+
+/* 通用表单 Input / Textarea 样式 */
+.modal-box form input, 
+.modal-box form textarea {
+    width: 100%; 
+    padding: 12px 16px; 
+    border: 2px solid #efe4d1; 
+    border-radius: 12px;
+    background-color: #fffdfa; 
+    outline: none; 
+    font-size: 14px; 
+    font-family: inherit; 
+    color: #5e4d3d; 
+    transition: 0.2s;
 }
 
-#publishForm input, #publishForm textarea {
-    width: 100%; padding: 12px 16px; border: 1px solid #eadcc7; border-radius: 12px;
-    background-color: #fffaf2; outline: none; font-size: 14px; font-family: inherit; color: #5e4d3d; transition: 0.2s;
+.modal-box form textarea {
+    resize: vertical; 
+    min-height: 80px;
 }
 
-#publishForm input:focus, #publishForm textarea:focus {
+.modal-box form input:focus, 
+.modal-box form textarea:focus {
     border-color: #c9a66b;
-    box-shadow: 0 0 0 3px rgba(201, 166, 107, 0.18);
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(201, 166, 107, 0.15);
 }
 
+.modal-box form input::placeholder,
+.modal-box form textarea::placeholder {
+    color: #c4b5a2;
+}
+
+/* 提交按钮 */
 .submit-btn {
-    width: 100%; margin-top: 30px; padding: 14px; background-color: #c9a66b; color: white;
-    border: none; border-radius: 12px; cursor: pointer; font-size: 16px; font-weight: 700; transition: 0.2s;
+    width: 100%; 
+    margin-top: 28px; 
+    padding: 14px; 
+    background-color: #b48752; 
+    color: white;
+    border: none; 
+    border-radius: 14px; 
+    cursor: pointer; 
+    font-size: 16px; 
+    font-weight: 700; 
+    transition: 0.2s;
 }
-.submit-btn:hover { background-color: #ad8952; }
+.submit-btn:hover { 
+    background-color: #9f7340; 
+    transform: translateY(-2px); 
+    box-shadow: 0 6px 15px rgba(159, 115, 64, 0.25);
+}
+.submit-btn:disabled { 
+    background-color: #d8cbb9; 
+    cursor: not-allowed; 
+    transform: none; 
+    box-shadow: none; 
+}
 
-/* 响应式 - 对齐 index.css */
-@media (max-width: 900px) {
-    .topbar { height: auto; padding: 18px; flex-wrap: wrap; gap: 14px; }
-    .main { flex-direction: column; }
-    .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #dfca8e; position: static; height: auto;}
-    .sidebar ul { display: flex; flex-wrap: wrap; gap: 10px; }
-    .sidebar li { margin-bottom: 0; }
-    .content { padding: 28px 20px; }
-    .content-header { flex-direction: column; align-items: flex-start; gap: 16px; }
-    .modal-box { width: 90%; }
-}
+
 /* --- 卡片内操作按钮（删除制品、取消收藏） --- */
 .delete-item-btn, .cancel-fav-btn {
     width: 100%;
@@ -300,4 +383,16 @@ body {
 .cancel-fav-btn:hover {
     background-color: #9184ad;
     transform: translateY(-1px);
+}
+
+/* 响应式 - 对齐 index.css */
+@media (max-width: 900px) {
+    .topbar { height: auto; padding: 18px; flex-wrap: wrap; gap: 14px; }
+    .main { flex-direction: column; }
+    .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #dfca8e; position: static; height: auto;}
+    .sidebar ul { display: flex; flex-wrap: wrap; gap: 10px; }
+    .sidebar li { margin-bottom: 0; }
+    .content { padding: 28px 20px; }
+    .content-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .modal-box { width: 90%; }
 }

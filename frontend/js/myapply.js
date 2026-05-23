@@ -53,25 +53,36 @@ function loadMyApplications() {
             let html = "";
 
             applications.forEach(app => {
-                const statusInfo = getStatusInfo(app.status, app.status_text);
+         const statusInfo = getStatusInfo(app.status, app.status_text);
+    
+        // --- 新增逻辑：如果是待处理(status=0)，添加取消按钮 ---
+        let actionBtnHtml = "";
+        if (app.status == 0) {
+            actionBtnHtml = `<button class="btn-cancel" onclick="cancelApplication(${app.exchange_id})">取消申请</button>`;
+         }
+        // --------------------------------------------------
 
-                html += `
-                    <div class="apply-card ${statusInfo.cardClass}">
-                        <div class="status-badge ${statusInfo.badgeClass}">
-                            ${escapeHtml(statusInfo.text)}
-                        </div>
-
-                        <h3>${escapeHtml(app.item_name || "未知制品")}</h3>
-
-                        <p><span>申请明细编号：</span>${app.detail_id}</p>
-                        <p><span>交换编号：</span>${app.exchange_id}</p>
-                        <p><span>制品编号：</span>${app.item_id}</p>
-                        <p><span>申请对象：</span>${escapeHtml(app.target_user_name || "未知用户")}</p>
-                        <p><span>申请数量：</span>${app.apply_quantity}</p>
-                        <p><span>制品余量：</span>${app.left_quantity}</p>
+            html += `
+                <div class="apply-card ${statusInfo.cardClass}">
+                    <div class="status-badge ${statusInfo.badgeClass}">
+                        ${escapeHtml(statusInfo.text)}
                     </div>
-                `;
-            });
+
+                    <h3>${escapeHtml(app.item_name || "未知制品")}</h3>
+
+                    <p><span>申请明细编号：</span>${app.detail_id}</p>
+                    <p><span>交换编号：</span>${app.exchange_id}</p>
+                    <p><span>制品编号：</span>${app.item_id}</p>
+                    <p><span>申请对象：</span>${escapeHtml(app.target_user_name || "未知用户")}</p>
+                    <p><span>申请数量：</span>${app.apply_quantity}</p>
+                    <p><span>制品余量：</span>${app.left_quantity}</p>
+                    
+                    <div class="card-actions">
+                        ${actionBtnHtml}
+                    </div>
+                </div>
+            `;
+        });
 
             applyList.innerHTML = html;
         })
@@ -160,4 +171,39 @@ if (imageInput) {
         }
 
     });
+}
+// 新增：取消申请的功能
+async function cancelApplication(exchangeId) {
+    const user = getCurrentUser();
+    if (!user || !user.user_id) {
+        alert("请先登录！");
+        return;
+    }
+
+    if (!confirm("确定要取消这个交换申请吗？此操作不可逆哦~")) return;
+
+    const params = new URLSearchParams();
+    params.append("exchange_id", exchangeId);
+    params.append("action", "cancel"); // 对应你后端的 action
+    params.append("user_id", user.user_id);
+
+    try {
+        const response = await fetch("http://127.0.0.1:8080/exchange/handle", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: params.toString()
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert("申请已取消！");
+            loadMyApplications(); // 成功后刷新列表
+        } else {
+            alert("取消失败: " + (data.message || "未知错误"));
+        }
+    } catch (error) {
+        console.error("取消申请请求失败:", error);
+        alert("网络连接失败，请检查后端是否启动~");
+    }
 }

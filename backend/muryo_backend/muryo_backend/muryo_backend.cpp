@@ -234,10 +234,9 @@ int main() {
         );
     });
     
-    //登录
+    // 登录接口
     svr.Post("/login", [](const Request& req, Response& res) {
         set_cors(res);
-
         Value response_json;
 
         string user_name = req.get_param_value("user_name");
@@ -246,11 +245,7 @@ int main() {
         if (user_name.empty() || password.empty()) {
             response_json["success"] = false;
             response_json["message"] = "用户名和密码不能为空哦~";
-
-            res.set_content(
-                response_json.toStyledString(),
-                "application/json; charset=UTF-8"
-            );
+            res.set_content(response_json.toStyledString(), "application/json; charset=UTF-8");
             return;
         }
 
@@ -258,59 +253,34 @@ int main() {
         if (conn == NULL) {
             response_json["success"] = false;
             response_json["message"] = "数据库连接失败";
-            res.set_content(
-                response_json.toStyledString(),
-                "application/json; charset=UTF-8"
-            );
+            res.set_content(response_json.toStyledString(), "application/json; charset=UTF-8");
             return;
         }
 
         char user_name_escape[512];
         char password_escape[512];
+        mysql_real_escape_string(conn, user_name_escape, user_name.c_str(), user_name.length());
+        mysql_real_escape_string(conn, password_escape, password.c_str(), password.length());
 
-        mysql_real_escape_string(
-            conn,
-            user_name_escape,
-            user_name.c_str(),
-            user_name.length()
-        );
-
-        mysql_real_escape_string(
-            conn,
-            password_escape,
-            password.c_str(),
-            password.length()
-        );
-
-        string sql = "SELECT user_id, user_name FROM user WHERE user_name='" ;
-        sql+= user_name_escape;
-        sql+= "' AND password='";
-        sql+= password_escape;
-        sql+= "'";
+        string sql = "SELECT user_id, user_name, status FROM user WHERE user_name='";
+        sql += user_name_escape;
+        sql += "' AND password='";
+        sql += password_escape;
+        sql += "'";
 
         if (mysql_query(conn, sql.c_str())) {
             response_json["success"] = false;
             response_json["message"] = "请求失败";
-            
-            res.set_content(
-                response_json.toStyledString(),
-                "application/json; charset=UTF-8"
-            );
-
+            res.set_content(response_json.toStyledString(), "application/json; charset=UTF-8");
             mysql_close(conn);
             return;
         }
 
         MYSQL_RES* result = mysql_store_result(conn);
-
         if (result == NULL) {
             response_json["success"] = false;
             response_json["message"] = "查询失败";
-            
-            res.set_content(
-                response_json.toStyledString(),
-                "application/json; charset=UTF-8"
-            );
+            res.set_content(response_json.toStyledString(), "application/json; charset=UTF-8");
             mysql_close(conn);
             return;
         }
@@ -318,10 +288,18 @@ int main() {
         MYSQL_ROW row = mysql_fetch_row(result);
 
         if (row) {
-            response_json["success"] = true;
-            response_json["message"] = "登录成功！欢迎来到Muryo！";
-            response_json["user_id"] = row[0] ? atoi(row[0]) : 0;
-            response_json["user_name"] = row[1] ? row[1] : "";
+            int status = row[2] ? atoi(row[2]) : -1;
+
+            if (status == 0) { 
+                response_json["success"] = false;
+                response_json["message"] = "该账号已被封禁，请联系管理员！";
+            }
+            else {
+                response_json["success"] = true;
+                response_json["message"] = "登录成功！欢迎来到Muryo！";
+                response_json["user_id"] = row[0] ? atoi(row[0]) : 0;
+                response_json["user_name"] = row[1] ? row[1] : "";
+            }
         }
         else {
             response_json["success"] = false;
@@ -331,11 +309,9 @@ int main() {
         mysql_free_result(result);
         mysql_close(conn);
 
-        res.set_content(
-            response_json.toStyledString(),
-            "application/json; charset=UTF-8"
-        );
+        res.set_content(response_json.toStyledString(), "application/json; charset=UTF-8");
     });
+
     
     //发布制品
     svr.Post("/items/publish", [](const Request& req, Response& res) {
@@ -2402,6 +2378,56 @@ int main() {
 
         res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
     });
+
+    //修改个人信息
+    svr.Post("/user/update", [](const Request& req, Response& res) {
+        set_cors(res);
+        Value response_json;
+
+        string user_id = req.get_param_value("user_id");
+        string user_name = req.get_param_value("user_name");
+        string contact = req.get_param_value("contact");
+        string intro = req.get_param_value("intro");
+        string password = req.get_param_value("password");
+
+        if (user_id.empty()) {
+            response_json["success"] = false;
+            response_json["message"] = "用户ID不能为空";
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        MYSQL* conn = connect_db();
+
+        // 转义辅助
+        auto escape = [&](string str) {
+            char buffer[1024];
+            mysql_real_escape_string(conn, buffer, str.c_str(), str.length());
+            return string(buffer);
+            };
+
+        string sql = "UPDATE user SET user_name = '" + escape(user_name) + "', " +
+            "contact = '" + escape(contact) + "', " +
+            "intro = '" + escape(intro) + "'";
+
+        if (!password.empty()) {
+            sql += ", password = '" + escape(password) + "'";
+        }
+
+        sql += " WHERE user_id = " + user_id;
+
+        if (mysql_query(conn, sql.c_str())) {
+            response_json["success"] = false;
+            response_json["message"] = "更新失败: " + string(mysql_error(conn));
+        }
+        else {
+            response_json["success"] = true;
+            response_json["message"] = "个人信息已更新";
+        }
+
+        mysql_close(conn);
+        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+        });
 
     /*
         下面是管理员相关部分
