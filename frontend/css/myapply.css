@@ -332,3 +332,142 @@ body {
 .btn-cancel:hover {
     background-color: #ff4757;
 }
+/* =========================================
+   新增：卡片按钮区域与按钮样式
+   ========================================= */
+.card-actions {
+    display: flex;
+    gap: 10px; /* 按钮之间的间距 */
+    margin-top: 15px;
+}
+
+.btn-edit, .btn-cancel {
+    flex: 1; /* 让两个按钮平分卡片宽度，整齐好看 */
+    padding: 10px 0;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    color: white;
+}
+
+.btn-edit:active, .btn-cancel:active {
+    transform: scale(0.96); /* 点击时的微缩放特效 */
+}
+
+/* 编辑按钮：使用 Muryo 经典金色 */
+.btn-edit {
+    background-color: #c9a66b; 
+}
+.btn-edit:hover {
+    background-color: #ad8952;
+}
+
+/* 取消按钮：使用柔和的警告红 */
+.btn-cancel {
+    background-color: #e07a5f; 
+}
+.btn-cancel:hover {
+    background-color: #c7644b;
+}
+
+/* =========================================
+   新增：修改时间地点弹窗 (Modal) 样式
+   ========================================= */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4); /* 半透明黑色背景遮罩 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* 确保弹窗盖住整个页面 */
+}
+
+.modal-box {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px; /* 弹窗最大宽度 */
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    position: relative;
+    animation: modalFadeIn 0.3s ease; /* 弹窗出现的动画 */
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #aaa;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.close-btn:hover {
+    color: #5c4b37;
+}
+
+.modal-box h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #5c4b37;
+    font-size: 20px;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #5c4b37;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    box-sizing: border-box; /* 防止 padding 撑破容器 */
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+    border-color: #c9a66b;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(201, 166, 107, 0.2); /* 聚焦时的金色外发光 */
+}
+
+.submit-btn {
+    background-color: #c9a66b;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.submit-btn:hover {
+    background-color: #ad8952;
+}

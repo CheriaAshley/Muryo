@@ -52,6 +52,26 @@
         
     </div>
 </div>
+<div id="editModal" class="modal" style="display: none;">
+    <div class="modal-box">
+        <span class="close-btn" onclick="closeEditModal()">&times;</span>
+        <h2>修改交换时间和地点</h2>
+        
+        <input type="hidden" id="editExchangeId">
+        
+        <div class="form-group">
+            <label for="editDate">交换日期 (纯数字，如: 20260524)</label>
+            <input type="number" id="editDate" placeholder="请输入数字格式的日期">
+        </div>
+        
+        <div class="form-group">
+            <label for="editLocation">交换地点</label>
+            <input type="text" id="editLocation" placeholder="请输入具体的交换地点">
+        </div>
+        
+        <button class="submit-btn" style="width: 100%; margin-top: 20px;" onclick="submitEdit()">确认修改</button>
+    </div>
+</div>
 
 <script src="js/auth.js"></script>
 <script src="js/myexchange.js"></script>

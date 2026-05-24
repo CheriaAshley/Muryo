@@ -312,7 +312,6 @@ int main() {
         res.set_content(response_json.toStyledString(), "application/json; charset=UTF-8");
     });
 
-    
     //发布制品
     svr.Post("/items/publish", [](const Request& req, Response& res) {
         set_cors(res);
@@ -761,6 +760,103 @@ int main() {
         );
     });
     
+    //修改交换时间和地点
+    svr.Post("/exchange/update_info", [](const Request& req, Response& res) {
+        set_cors(res);
+        Value response_json;
+
+        string exchange_id_str = req.get_param_value("exchange_id");
+        string user_id_str = req.get_param_value("user_id");
+        string date_str = req.get_param_value("date");
+        string location = req.get_param_value("location");
+
+        if (exchange_id_str.empty() || user_id_str.empty() || date_str.empty() || location.empty()) {
+            response_json["success"] = false;
+            response_json["message"] = "交换ID、用户ID、时间或地点不能为空";
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        int exchange_id, user_id, date;
+        try {
+            exchange_id = stoi(exchange_id_str);
+            user_id = stoi(user_id_str);
+            date = stoi(date_str);
+        }
+        catch (...) {
+            response_json["success"] = false;
+            response_json["message"] = "参数格式错误，ID和时间必须是数字格式";
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        MYSQL* conn = connect_db();
+        if (conn == NULL) {
+            response_json["success"] = false;
+            response_json["message"] = "数据库连接失败";
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        string check_sql = "SELECT ufrom, uto FROM exchange WHERE exchange_id = " + to_string(exchange_id);
+        if (mysql_query(conn, check_sql.c_str())) {
+            response_json["success"] = false;
+            response_json["message"] = "查询申请记录失败";
+            mysql_close(conn);
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        MYSQL_RES* result = mysql_store_result(conn);
+        if (result == NULL) {
+            response_json["success"] = false;
+            response_json["message"] = "获取记录失败";
+            mysql_close(conn);
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        MYSQL_ROW row = mysql_fetch_row(result);
+        if (row == NULL) {
+            mysql_free_result(result);
+            mysql_close(conn);
+            response_json["success"] = false;
+            response_json["message"] = "该交换申请不存在";
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        int ufrom = row[0] ? atoi(row[0]) : 0;
+        int uto = row[1] ? atoi(row[1]) : 0;
+        mysql_free_result(result);
+
+        if (user_id != ufrom && user_id != uto) {
+            mysql_close(conn);
+            response_json["success"] = false;
+            response_json["message"] = "你没有权限修改这个交换申请的时间和地点哦！";
+            res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+            return;
+        }
+
+        // 执行更新操作 (转义地点字符串，防止SQL注入)
+        char escape_location[512];
+        mysql_real_escape_string(conn, escape_location, location.c_str(), location.length());
+
+        string update_sql = "UPDATE exchange SET date = " + to_string(date) + ", location = '" + escape_location + "' WHERE exchange_id = " + to_string(exchange_id);
+
+        if (mysql_query(conn, update_sql.c_str())) {
+            response_json["success"] = false;
+            response_json["message"] = "更新失败: " + string(mysql_error(conn));
+        }
+        else {
+            response_json["success"] = true;
+            response_json["message"] = "时间和地点更新成功！";
+        }
+
+        mysql_close(conn);
+        res.set_content(response_json.toStyledString(), "application/json;charset=UTF-8");
+    });
+
     //处理申请
     svr.Post("/exchange/handle", [](const Request& req, Response& res) {
         set_cors(res);
@@ -962,7 +1058,7 @@ int main() {
         string sql =
             "SELECT exchange_id, detail_id, item_id, item_name, "
             "apply_quantity, left_quantity, status, status_text, "
-            "target_user_id, target_user_name "
+            "target_user_id, target_user_name,date,location,target_user_phone "
             "FROM view_exchange_detail "
             "WHERE apply_user_id = " + to_string(uto) + " "
             "ORDER BY "
@@ -1021,6 +1117,9 @@ int main() {
             item["status_text"] = row[7] ? row[7] : "";
             item["target_user_id"] = row[8] ? atoi(row[8]) : 0;
             item["target_user_name"] = row[9] ? row[9] : "";
+            item["date"] = row[10] ? atoi(row[10]) : 0;
+            item["location"] = row[11] ? row[11] : "待确定";
+            item["target_user_phone"] = row[12] ? row[12] : "未知";
 
             data.append(item);
         }
@@ -1834,7 +1933,7 @@ int main() {
             "apply_quantity, "
             "left_quantity, "
             "status, "
-            "status_text "
+            "status_text,date,location,apply_user_phone "
             "FROM view_exchange_detail "
             "WHERE target_user_id = " + to_string(ufrom) + " "
             "ORDER BY "
@@ -1887,6 +1986,9 @@ int main() {
             item["left_quantity"] = row[9] ? atoi(row[9]) : 0;
             item["status"] = row[10] ? atoi(row[10]) : -1;
             item["status_text"] = row[11] ? row[11] : "";
+            item["date"] = row[12] ? atoi(row[12]) : 0;
+            item["location"] = row[13] ? row[13] : "待确定";
+            item["apply_user_phone"] = row[14] ? row[14] : "未知";
 
             data.append(item);
         }

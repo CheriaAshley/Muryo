@@ -3,7 +3,6 @@ window.onload = function () {
 
     updateLoginState();
     updateAdminEntry();
-    updateLoginState();
     loadMyExchange();
 };
 
@@ -40,6 +39,17 @@ function loadMyExchange() {
             list.forEach(item => {
                 const statusInfo = getStatusInfo(item.status, item.status_text);
 
+                // --- 新增：处理时间和地点的显示 ---
+                let displayDate = (item.date && item.date !== 0 && item.date !== '0') ? item.date : "待确定";
+                let displayLocation = (item.location && item.location !== '待确定') ? escapeHtml(item.location) : "待确定";
+
+                // --- 新增：编辑按钮 ---
+                let actionBtnHtml = "";
+                // 如果是待处理(0)或已同意待交换(2)，都可以编辑时间地点
+                if (item.status == 0 || item.status == 2) {
+                    actionBtnHtml += `<button class="btn-edit" onclick="openEditModal(${item.exchange_id}, '${item.date || ''}', '${item.location || ''}')">编辑时间地点</button>`;
+                }
+
                 html += `
                     <div class="trade-card ${statusInfo.cardClass}">
                         <div class="status-badge ${statusInfo.badgeClass}">
@@ -54,6 +64,13 @@ function loadMyExchange() {
                         <p><span>制品编号：</span>${item.item_id}</p>
                         <p><span>申请数量：</span>${item.apply_quantity}</p>
                         <p><span>当前余量：</span>${item.left_quantity}</p>
+                        <p><span>交换日期：</span><strong style="color:#d4a373;">${displayDate}</strong></p>
+                        <p><span>交换地点：</span><strong style="color:#d4a373;">${displayLocation}</strong></p>
+                        <p><span>对方联系方式：</span><strong style="color:#e07a5f;">${escapeHtml(item.apply_user_phone || "同意后可见")}</strong></p>
+                        
+                        <div class="card-actions">
+                            ${actionBtnHtml}
+                        </div>
                     </div>
                 `;
             });
@@ -88,4 +105,68 @@ function escapeHtml(str) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#39;");
+}
+
+/* =========================================
+   新增：编辑交换时间和地点的弹窗逻辑
+   ========================================= */
+
+// 1. 打开弹窗并回显数据
+function openEditModal(exchangeId, oldDate, oldLocation) {
+    document.getElementById("editExchangeId").value = exchangeId;
+    
+    document.getElementById("editDate").value = (oldDate && oldDate !== '0') ? oldDate : "";
+    document.getElementById("editLocation").value = (oldLocation && oldLocation !== '待确定') ? oldLocation : "";
+    
+    document.getElementById("editModal").style.display = "flex"; 
+}
+
+// 2. 关闭弹窗
+function closeEditModal() {
+    document.getElementById("editModal").style.display = "none";
+}
+
+// 3. 提交修改请求
+async function submitEdit() {
+    const user = getCurrentUser();
+    if (!user || !user.user_id) {
+        alert("请先登录！");
+        return;
+    }
+
+    const exchangeId = document.getElementById("editExchangeId").value;
+    const newDate = document.getElementById("editDate").value;
+    const newLocation = document.getElementById("editLocation").value;
+
+    if (!newDate || !newLocation) {
+        alert("交换时间和交换地点都必须填写哦！");
+        return;
+    }
+
+    const params = new URLSearchParams();
+    params.append("exchange_id", exchangeId);
+    params.append("user_id", user.user_id);
+    params.append("date", newDate);
+    params.append("location", newLocation);
+
+    try {
+        const response = await fetch("http://127.0.0.1:8080/exchange/update_info", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: params.toString()
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert("交换时间和地点修改成功！");
+            closeEditModal();
+            loadMyExchange(); // 修改成功后刷新列表
+        } else {
+            alert("修改失败: " + (data.message || "未知错误"));
+        }
+    } catch (error) {
+        console.error("修改时间地点请求失败:", error);
+        alert("网络连接失败，请检查后端服务是否启动~");
+    }
 }

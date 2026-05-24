@@ -315,14 +315,18 @@ SELECT
     e.exchange_id,
     e.uto AS apply_user_id,
     u_apply.user_name AS apply_user_name,
+    IF(e.status >= 2, u_apply.contact, '同意后可见') AS apply_user_phone,
     e.ufrom AS target_user_id,
     u_target.user_name AS target_user_name,
+    IF(e.status >= 2, u_target.contact, '同意后可见') AS target_user_phone,
     d.detail_id,
     d.item_id,
     i.item_name,
     d.quantity AS apply_quantity,
     i.quantity AS left_quantity,
     e.status,
+    e.date,
+    e.location,
     CASE
         WHEN e.status = 0 THEN '待处理'
         WHEN e.status = 1 THEN '已拒绝'
