@@ -2,13 +2,10 @@
 
 
 
-!\[C++](https://img.shields.io/badge/C++-11%2F14%2F17-blue)
-
-!\[MySQL](https://img.shields.io/badge/MySQL-8.0-orange)
-
-!\[Visual Studio](https://img.shields.io/badge/Visual\_Studio-2022-purple)
-
-!\[License](https://img.shields.io/badge/Academic-Nankai\_University-red)
+![C++](https://img.shields.io/badge/C%2B%2B-11%2F14%2F17-blue)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-orange)
+![Visual Studio](https://img.shields.io/badge/Visual_Studio-2022-purple)
+![License](https://img.shields.io/badge/Academic-Nankai_University-red)
 
 
 
@@ -192,13 +189,13 @@
 
 
 
-\* !\[登录页面](./images/login.png)
+![登录页面](./images/login.png)
 
-\* !\[首页大厅](./images/home.png)
+![首页大厅](./images/home.png)
 
-\* !\[我的主页](./images/mypage.png)
+![我的主页](./images/mypage.png)
 
-\* !\[管理员审核中心](./images/admin.png)
+![管理员审核中心](./images/admin.png)
 
 
 
