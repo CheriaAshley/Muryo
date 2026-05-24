@@ -1,16 +1,26 @@
-# Visual Studio
+# Visual Studio 相关
 .vs/
+*.user
+*.suo
+*.sln.docstates
 
-# Build
+# 编译输出目录
 Debug/
 Release/
 x64/
 x86/
+ipch/
 
-# C++
+# 编译生成文件
 *.obj
 *.exe
 *.pdb
+*.ilk
+*.lib
+*.exp
+*.log
 
-# Others
-*.user
+# 临时/日志文件
+*.tmp
+*.bak
+*.txt
