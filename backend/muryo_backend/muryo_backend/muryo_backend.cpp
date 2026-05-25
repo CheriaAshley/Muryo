@@ -22,7 +22,7 @@ MYSQL* connect_db() {
         conn,
         "127.0.0.1",      // host
         "muryo_user",     // user，改为你的数据库用户名
-        "muryo123",        // password，改为你的数据库密码
+        "muryo123",       // password，改为你的数据库密码
         "muryo",          // database
         3306,             // port
         NULL,
@@ -3170,11 +3170,8 @@ int main() {
             return;
         }
 
-        // 修改后的后端逻辑
         if (apply_type != "ban_item" && apply_type != "ban_user") {
-            // 如果是拒绝操作，且类型未知，则允许进入处理逻辑（直接去更新状态为已拒绝）
             if (action == "reject") {
-                // 允许继续，直接执行下面的更新 SQL
             }
             else {
                 // 如果是未知类型且想点同意，则拦截
