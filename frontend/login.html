@@ -4,7 +4,14 @@
     <meta charset="UTF-8">
     <title>欢迎来到Muryo~ </title>
     <link rel="stylesheet" href="css/login.css">
+
+    <!-- 预连接，优化 Google Fonts 加载性能 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!--display=swap优化加载体验，先显示默认字体-->
     <link href="https://fonts.googleapis.com/css2?family=Nunito&display=swap" rel="stylesheet">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
@@ -12,14 +19,19 @@
 <div class="container">
     <div class="formbox">
         <h2 class="title">欢迎来到Muryo~</h2>
-        <form onsubmit="login(); return false;">
-            <input type="text" id="username" name="username" placeholder="请输入咪的用户名">
+
+        <form id="loginForm">
+            <label for="username" class="sr-only">用户名</label>
+            <input type="text" id="username" name="username" placeholder="请输入咪的用户名，不区分大小写哟~" autofocus>
+
+            <label for="password" class="sr-only">密码</label>
             <input type="password" id="password" name="password" placeholder="请咪输入密码，注意区分大小写哟~">
 
             <button type="submit" id="loginBtn">登录</button>
         </form>
+
         <p id="msg" class="msg-text"></p>
-        
+
         <p class="register-text">
             还没有使用过Muryo？
             <a href="register.html">点击这里注册~</a>
@@ -27,21 +39,7 @@
     </div>
 </div>
 
-<script src="js/login.js"></script>
-<script>
-    document.getElementById("username").addEventListener("keydown", function(event) {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            document.getElementById("password").focus();
-        }
-    });
+<script src="js/login.js" defer></script>
 
-    document.getElementById("password").addEventListener("keydown", function(event) {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            login();
-        }
-    });
-</script>
 </body>
 </html>

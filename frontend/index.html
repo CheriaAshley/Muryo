@@ -2,44 +2,57 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Muryo 首页</title>
+
     <link rel="stylesheet" href="css/index.css">
+
+    <!-- 预连接，优化 Google Fonts 加载性能 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
-<body>
 
+<body>
 <div class="page">
 
+    <!-- 顶部栏 -->
     <header class="topbar">
         <div class="logo">Muryo ~</div>
 
         <div class="search-box">
-            <input type="text" id="searchInput" placeholder="搜索制品或厨子" onkeydown="handleSearchEnter(event)">
-            <button onclick="searchItems()">搜索</button>
-            <button onclick="resetSearch()">查看全部</button>
+            <input type="text" id="searchInput" placeholder="搜索相关制品、厨子">
+            <button id="searchBtn">搜索</button>
+            <button id="resetBtn">查看全部</button>
         </div>
 
         <div class="user-actions">
             <span id="welcomeText"></span>
-            <button id="loginBtn" onclick="goLogin()">登录</button>
-            <button id="logoutBtn" onclick="logout()">退出登录</button>
+            <button id="loginBtn">登录</button>
+            <button id="logoutBtn">退出登录</button>
         </div>
     </header>
 
-    <div class="main">
+    <!-- 页面主体 -->
+    <main class="main">
 
+        <!-- 侧边栏 -->
         <aside class="sidebar">
-            <ul>
-                <li class="active" onclick="goHome()">首页</li>
-                <li onclick="goMyPage()">我的主页</li>
-                <li onclick="goMyApply()">我的申请</li>
-                <li onclick="goMyExchange()">我的交换</li>
-                <li onclick="goTodoApply()">待办申请</li>
-                <li id="adminEntry" onclick="goAdminCenter()" style="display: none;">管理员中心</li>
-            </ul>
+            <nav>
+                <ul>
+                    <li id="homeNav" class="active" role="button" tabindex="0">首页</li>
+                    <li id="myPageNav" role="button" tabindex="0">我的主页</li>
+                    <li id="myApplyNav" role="button" tabindex="0">我的申请</li>
+                    <li id="myExchangeNav" role="button" tabindex="0">我的交换</li>
+                    <li id="todoApplyNav" role="button" tabindex="0">待办申请</li>
+                    <li id="adminEntry" role="button" tabindex="0" style="display: none;">管理员中心</li>
+                </ul>
+            </nav>
         </aside>
 
+        <!-- 内容区域 -->
         <section class="content">
             <div class="content-header">
                 <h1>制品广场</h1>
@@ -52,11 +65,10 @@
             </div>
         </section>
 
-    </div>
+    </main>
 </div>
 
-
-<script src="js/auth.js"></script>
-<script src="js/index.js"></script>
+<script src="js/auth.js" defer></script>
+<script src="js/index.js" defer></script>
 </body>
 </html>

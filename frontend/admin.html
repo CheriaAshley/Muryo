@@ -2,34 +2,44 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>管理员中心 - Muryo</title>
+
+    <title>Muryo-管理员中心</title>
+
     <link rel="stylesheet" href="css/admin.css">
+
+    <!--预连接，优化性能-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
-<body>
 
+<body>
 <div class="page">
     <header class="topbar">
         <div class="logo">Muryo ~</div>
 
         <div class="user-actions">
             <span id="welcomeText"></span>
-            <button id="loginBtn" onclick="goLogin()">登录</button>
-            <button id="logoutBtn" onclick="logout()">退出登录</button>
+            <button id="loginBtn">登录</button>
+            <button id="logoutBtn">退出登录</button>
         </div>
     </header>
 
-    <div class="main">
+    <main class="main">
         <aside class="sidebar">
-            <ul>
-                <li onclick="goHome()">首页</li>
-                <li onclick="goMyPage()">我的主页</li>
-                <li onclick="goMyApply()">我的申请</li>
-                <li onclick="goMyExchange()">我的交换</li>
-                <li onclick="goTodoApply()">待办申请</li>
-                <li id="adminEntry" class="active" onclick="goAdminCenter()" style="display: block;">管理员中心</li>
-            </ul>
+            <nav>
+                <ul>
+                    <li id="homeNav" role="button" tabindex="0">首页</li>
+                    <li id="myPageNav" role="button" tabindex="0">我的主页</li>
+                    <li id="myApplyNav" role="button" tabindex="0">我的申请</li>
+                    <li id="myExchangeNav" role="button" tabindex="0">我的交换</li>
+                    <li id="todoApplyNav" role="button" tabindex="0">待办申请</li>
+                    <li id="adminEntry" class="active" role="button" tabindex="0">管理员中心</li>
+                </ul>
+            </nav>
         </aside>
 
         <section class="content">
@@ -42,10 +52,10 @@
                 <p>正在加载权限功能...</p>
             </div>
         </section>
-    </div>
+    </main>
 </div>
 
-<script src="js/auth.js"></script>
-<script src="js/admin.js"></script>
+<script src="js/auth.js" defer></script>
+<script src="js/admin.js" defer></script>
 </body>
 </html>

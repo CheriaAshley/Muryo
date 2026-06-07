@@ -313,3 +313,14 @@ body {
     .sidebar li { margin-bottom: 0; }
     .content { padding: 28px 20px; }
 }
+
+.admin-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.danger-btn {
+    background-color: #cf8e7c;
+}

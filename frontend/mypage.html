@@ -2,42 +2,54 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的主页 - Muryo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/mypage.css">
+
+    <!-- 预连接，优化 Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <div class="page">
+
+    <!-- 顶部栏 -->
     <header class="topbar">
         <div class="logo">Muryo ~</div>
         <div class="user-actions">
             <span id="welcomeText"></span>
-            <button id="loginBtn" onclick="goLogin()">登录</button>
-            <button id="logoutBtn" onclick="logout()">退出登录</button>
+            <button id="loginBtn" type="button">登录</button>
+            <button id="logoutBtn" type="button">退出登录</button>
         </div>
     </header>
 
-    <div class="main">
+    <!-- 主体区域 -->
+    <main class="main">
+
+        <!-- 侧边栏 -->
         <aside class="sidebar">
-            <ul>
-                <li onclick="goHome()">首页</li>
-                <li class="active" onclick="goMyPage()">我的主页</li>
-                <li onclick="goMyApply()">我的申请</li>
-                <li onclick="goMyExchange()">我的交换</li>
-                <li onclick="goTodoApply()">待办申请</li>
-                <li id="adminEntry" onclick="goAdminCenter()" style="display: none;">管理员中心</li>
-            </ul>
+            <nav>
+                <ul>
+                    <li id="homeNav" role="button" tabindex="0">首页</li>
+                    <li id="myPageNav" class="active" role="button" tabindex="0">我的主页</li>
+                    <li id="myApplyNav" role="button" tabindex="0">我的申请</li>
+                    <li id="myExchangeNav" role="button" tabindex="0">我的交换</li>
+                    <li id="todoApplyNav" role="button" tabindex="0">待办申请</li>
+                    <li id="adminEntry" role="button" tabindex="0" style="display: none;">管理员中心</li>
+                </ul>
+            </nav>
         </aside>
 
+        <!-- 内容区域 -->
         <section class="content">
             <div class="content-header">
                 <div>
                     <h1>我的主页</h1>
                     <p>查看个人信息和我发布的制品</p>
                 </div>
-                <button class="publish-btn" onclick="openPublishModal()">发布制品</button>
+                <button id="openPublishModalBtn" class="publish-btn" type="button">发布制品</button>
             </div>
 
             <div class="profile-card" id="profileCard">
@@ -65,16 +77,17 @@
                 </div>
             </div>
         </section>
-    </div>
+    </main>
 </div>
 
+<!-- 发布制品弹窗 -->
 <div class="modal-mask" id="publishModal">
     <div class="modal-box">
         <div class="modal-header">
             <h2>发布制品</h2>
-            <span class="close-btn" onclick="closePublishModal()">×</span>
+            <button id="closePublishModalBtn" class="close-btn" type="button" aria-label="关闭弹窗">×</button>
         </div>
-        <form id="publishForm" onsubmit="publishItem(); return false;">
+        <form id="publishForm">
             <label>制品名称</label>
             <input type="text" id="itemName" required>
             
@@ -98,13 +111,14 @@
     </div>
 </div>
 
+<!-- 编辑个人资料弹窗 -->
 <div class="modal-mask" id="editProfileModal">
     <div class="modal-box">
         <div class="modal-header">
             <h2>编辑个人资料</h2>
-            <span class="close-btn" onclick="closeEditModal()">×</span>
+            <button id="closeEditProfileBtn" class="close-btn" type="button" aria-label="关闭弹窗">×</button>
         </div>
-        <form onsubmit="saveProfile(); return false;">
+        <form id="editProfileForm">
             <label>用户名</label>
             <input type="text" id="editUserName" required>
             
@@ -122,17 +136,18 @@
     </div>
 </div>
 
+<!-- 申请交换弹窗 -->
 <div class="modal-mask" id="applyModal">
     <div class="modal-box" style="width: 400px;">
         <div class="modal-header">
             <h2>申请交换</h2>
-            <span class="close-btn" onclick="closeApplyModal()">×</span>
+            <button id="closeApplyModalBtn" class="close-btn" type="button" aria-label="关闭弹窗">×</button>
         </div>
         <div style="margin-bottom: 20px; color: #74542e; font-size: 15px; line-height: 1.5;">
             你正在向 <strong><span id="applyOwnerName"></span></strong> 申请交换：<br>
             <strong style="color: #b48752; font-size: 18px;" id="applyItemName"></strong>
         </div>
-        <form onsubmit="submitApply(); return false;">
+        <form id="applyForm">
             <label>申请数量 (当前余量: <span id="applyMaxQty">0</span>)</label>
             <input type="number" id="applyQuantity" min="1" required>
             <button type="submit" class="submit-btn" id="submitApplyBtn" style="margin-top: 24px;">发送申请</button>
@@ -140,7 +155,7 @@
     </div>
 </div>
 
-<script src="js/auth.js"></script>
-<script src="js/mypage.js"></script>
+<script src="js/auth.js" defer></script>
+<script src="js/mypage.js" defer></script>
 </body>
 </html>

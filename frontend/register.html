@@ -2,23 +2,51 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>注册 Muryo 账号</title>
+
     <link rel="stylesheet" href="css/login.css">
+
+    <!-- 预连接，优化 Google Fonts 加载性能 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
     <link href="https://fonts.googleapis.com/css2?family=Nunito&display=swap" rel="stylesheet">
 </head>
-<body>
 
+<body>
 <div class="container">
     <div class="formbox">
         <h2 class="title">加入 Muryo ~</h2>
 
-        <form onsubmit="register(); return false;">
-            <input type="text" id="username" name="username" placeholder="咪请输入想注册的用户名~">
-            <input type="password" id="password" name="password" placeholder="请输入密码">
-            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="咪再次确认一下密码~">
-            
-             <button type="submit" id="registerBtn">注册</button>
+        <form id="registerForm">
+            <input
+                type="text"
+                id="username"
+                name="username"
+                placeholder="咪请输入想注册的用户名~"
+                required
+            >
+
+            <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="请输入密码"
+                required
+            >
+
+            <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                placeholder="咪再次确认一下密码~"
+                required
+            >
+
+            <button type="submit" id="registerBtn">注册</button>
         </form>
 
         <p id="msg" class="msg-text"></p>
@@ -30,21 +58,6 @@
     </div>
 </div>
 
-<script src="js/register.js"></script>
-<script>
-    document.getElementById("username").addEventListener("keydown", function(event) {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            document.getElementById("password").focus();
-        }
-    });
-
-    document.getElementById("password").addEventListener("keydown", function(event) {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            document.getElementById("confirmPassword").focus();
-        }
-    });
-</script>
+<script src="js/register.js" defer></script>
 </body>
 </html>
