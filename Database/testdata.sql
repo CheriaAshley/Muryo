@@ -91,9 +91,9 @@ INSERT INTO item(item_id, owner, item_name, role, type, quantity, status, img_ur
 -- 插入管理员申请数据
 INSERT INTO admin_apply(apply_id, admin_id, apply_type, target_id, reason, status, handle_admin_id, handle_time) VALUES
 (1, 8, 'delete_item', 6, '制品信息不完整，申请删除', 0, NULL, NULL),
-(2, 8, 'delete_item', 18, '该制品疑似重复发布', 1, 10, '2026-05-01 10:20:00'),
-(3, 9, 'ban_user', 11, '用户多次发布无效信息', 1, 10, '2026-05-02 14:30:00'),
-(4, 9, 'ban_user', 7, '申请封禁该用户，但证据不足', 2, 10, '2026-05-03 16:45:00'),
+(2, 8, 'delete_item', 18, '该制品疑似重复发布', 0, NULL, NULL),
+(3, 9, 'ban_user', 11, '用户多次发布无效信息', 0, NULL, NULL),
+(4, 9, 'ban_user', 7, '申请封禁该用户，但证据不足', 0, NULL, NULL),
 (5, 10, 'restore_user', 11, '用户申诉后恢复账号', 0, NULL, NULL),
 (6, 10, 'promote_admin', 5, '该用户活跃度较高，申请成为一级管理员', 0, NULL, NULL);
 

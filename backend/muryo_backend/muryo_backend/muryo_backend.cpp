@@ -19,7 +19,7 @@ MYSQL* connect_db() {
     }
     //连接数据库
     conn = mysql_real_connect(
-        conn,
+        conn, 
         "127.0.0.1",      // host
         "muryo_user",     // user，改为你的数据库用户名
         "muryo123",       // password，改为你的数据库密码
